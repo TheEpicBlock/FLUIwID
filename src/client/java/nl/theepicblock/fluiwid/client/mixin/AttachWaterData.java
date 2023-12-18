@@ -7,6 +7,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import nl.theepicblock.fluiwid.FishyBusiness;
+import nl.theepicblock.fluiwid.PlayerDuck;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(ClientPlayerEntity.class)
-public abstract class AttachWaterData extends PlayerEntity {
+public abstract class AttachWaterData extends PlayerEntity implements PlayerDuck {
     @Shadow @Final private List<ClientPlayerTickable> tickables;
     @Unique
     private FishyBusiness waterData;
@@ -32,5 +34,10 @@ public abstract class AttachWaterData extends PlayerEntity {
         // TODO only add water data if the player is actually liquid
         this.waterData = new FishyBusiness(this);
         this.tickables.add(() -> this.waterData.tick());
+    }
+
+    @Override
+    public @Nullable FishyBusiness getFluiwidData() {
+        return this.waterData;
     }
 }

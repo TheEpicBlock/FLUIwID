@@ -1,9 +1,11 @@
 package nl.theepicblock.fluiwid;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.annotation.Debug;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class FishyBusiness {
     /**
@@ -21,5 +23,10 @@ public class FishyBusiness {
 
     public void tick() {
 
+    }
+
+    @Debug
+    public Iterable<Droplet> getDroplets() {
+        return particles;
     }
 }
