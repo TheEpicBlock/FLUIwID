@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "nl.theepicblock.fluiwid.client.mixin",
+	"package": "nl.theepicblock.fluiwid.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
 	],
