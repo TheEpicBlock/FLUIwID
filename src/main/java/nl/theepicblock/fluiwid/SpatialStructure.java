@@ -1,5 +1,6 @@
 package nl.theepicblock.fluiwid;
 
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,6 +27,25 @@ public class SpatialStructure<T extends SpatialStructure.SpatialItem> implements
         return backend.spliterator();
     }
 
+    public Box getBoundingBox() {
+        var minX = Double.MAX_VALUE;
+        var minY = Double.MAX_VALUE;
+        var minZ = Double.MAX_VALUE;
+        var maxY = Double.MIN_VALUE;
+        var maxZ = Double.MIN_VALUE;
+        var maxX = Double.MIN_VALUE;
+        for (var v : this) {
+            var b = v.getBoundsWithMovement();
+            minX = Math.min(minX, b.minX);
+            minY = Math.min(minY, b.minY);
+            minZ = Math.min(minZ, b.minZ);
+            maxX = Math.max(maxX, b.maxX);
+            maxY = Math.max(maxY, b.maxY);
+            maxZ = Math.max(maxZ, b.maxZ);
+        }
+        return new Box(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
     public void insert(Vec3d position, T item) {
         item.updatePosition(position);
         backend.add(item);
@@ -33,5 +53,7 @@ public class SpatialStructure<T extends SpatialStructure.SpatialItem> implements
 
     public interface SpatialItem {
         void updatePosition(Vec3d pos);
+        Box getBox();
+        Box getBoundsWithMovement();
     }
 }
