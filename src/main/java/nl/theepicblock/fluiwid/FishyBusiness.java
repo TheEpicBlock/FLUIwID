@@ -10,9 +10,9 @@ import java.util.Iterator;
 public class FishyBusiness {
     public final static float DELTA_T = 1/20f;
     public final static float DROPLET_SIZE = 1/16f;
-    public final static float GRAVITY = 2.2f*DELTA_T;
+    public final static float GRAVITY = 2f*DELTA_T;
     public final static float COLLISION_ENERGY = 0.5f;
-    public final static float DRAG = 0.95f;
+    public final static float DRAG = 0.98f;
     /**
      * Keeps track of water particles
      */
@@ -29,33 +29,35 @@ public class FishyBusiness {
     }
 
     public void tick() {
-        var totalBox = this.particles.getBoundingBox();
         for (var droplet : this.particles) {
-
             // Repulsion force between particles
             for (var droplet2 : this.particles) {
                 var delta = droplet.position.subtract(droplet2.position);
                 var length = delta.length();
                 var direction = delta.normalize();
                 // Push with a maximum force of .5 blocks/tick², it'll likely be lower though
-                var force = smoothKernel(0.5f, length) * 0.02;
+                var force = smoothKernel(0.6f, length) * 0.08;
                 droplet.velocity = droplet.velocity.add(direction.multiply(force));
             }
 
             // Attraction force
-            var delta = droplet.position.subtract(player.getPos().add(0,2,0));
+            var delta = droplet.position.subtract(player.getPos().add(0,1.7,0));
             var length = delta.length();
             var direction = delta.normalize();
-            var force = smoothKernel(6f, length) * -0.07;
+            var force = smoothKernel(7f, length) * -0.12;
             droplet.velocity = droplet.velocity.add(direction.multiply(force));
 
             // Gravity
             // We cheat a little by removing gravity near the player
-            var grav = GRAVITY * (1-smoothKernel(2f, droplet.position.subtract(player.getPos()).length()));
+            var grav_nearness = (1-smoothKernel(0.5f, droplet.position.subtract(player.getPos().add(0, 0.5, 0)).multiply(1, 0.5, 1).length()));
+            var grav = GRAVITY * grav_nearness;
             droplet.velocity = droplet.velocity.add(0, -grav, 0);
 
+            // General velocity dampening
+            droplet.velocity = droplet.velocity.multiply(Math.max(0.01, 1-(smoothKernel(3f, droplet.position.subtract(player.getPos().add(0, 0.5, 0)).multiply(1, 0.5, 1).lengthSquared()))*droplet.velocity.lengthSquared()));
+
             droplet.adjustForCollisions(player.getWorld().getCollisions(player, droplet.getBoundsWithMovement()));
-            droplet.position = droplet.position.add(droplet.velocity);
+            droplet.position = droplet.position.add(droplet.velocity.multiply(0.2));
         }
     }
 
