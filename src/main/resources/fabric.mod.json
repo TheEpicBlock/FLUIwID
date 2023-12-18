@@ -1,31 +1,31 @@
 {
 	"schemaVersion": 1,
-	"id": "modid",
+	"id": "fluiwid",
 	"version": "${version}",
 	"name": "Example mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Become the dihydrogen monoxide",
 	"authors": [
 		"Me!"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/TheEpicBlock/FLUIwID/blob/master/README.md",
+		"sources": "https://github.com/TheEpicBlock/FLUIwID"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/modid/icon.png",
+	"icon": "assets/fluiwid/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.example.ExampleMod"
+			"nl.theepicblock.fluiwid.Fluiwid"
 		],
 		"client": [
-			"com.example.ExampleModClient"
+			"nl.theepicblock.fluiwid.client.FluiwidClient"
 		]
 	},
 	"mixins": [
-		"modid.mixins.json",
+		"fluiwid.mixins.json",
 		{
-			"config": "modid.client.mixins.json",
+			"config": "fluiwid.client.mixins.json",
 			"environment": "client"
 		}
 	],
@@ -34,8 +34,5 @@
 		"minecraft": "~1.20.4",
 		"java": ">=17",
 		"fabric-api": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
 	}
 }
