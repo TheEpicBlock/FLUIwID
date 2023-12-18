@@ -8,10 +8,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class FishyBusiness {
-    public final static float DROPLET_SIZE = 1/16f;
-    public final static float GRAVITY = 9.8f;
-    public final static float COLLISION_ENERGY = 0.8f;
     public final static float DELTA_T = 1/20f;
+    public final static float DROPLET_SIZE = 1/16f;
+    public final static float GRAVITY = 4.2f*DELTA_T;
+    public final static float COLLISION_ENERGY = 0.5f;
+    public final static float DRAG = 0.95f;
     /**
      * Keeps track of water particles
      */
@@ -30,10 +31,9 @@ public class FishyBusiness {
     public void tick() {
         var totalBox = this.particles.getBoundingBox();
         for (var droplet : this.particles) {
-            droplet.velocity = droplet.velocity.add(0, -GRAVITY*DELTA_T, 0);
-            droplet.velocity = new Vec3d(0, -0.1f, 0);
+            droplet.velocity = droplet.velocity.add(0, -GRAVITY, 0);
             droplet.adjustForCollisions(player.getWorld().getCollisions(player, totalBox.expand(1)));
-            droplet.position = droplet.position.add(droplet.velocity.multiply(DELTA_T));
+            droplet.position = droplet.position.add(droplet.velocity);
         }
     }
 

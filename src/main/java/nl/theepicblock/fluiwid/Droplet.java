@@ -9,6 +9,9 @@ import net.minecraft.util.shape.VoxelShapes;
 public class Droplet implements SpatialStructure.SpatialItem {
     private static final float SIZE = FishyBusiness.DROPLET_SIZE;
     public Vec3d position;
+    /**
+     * Measures in blocks per tick
+     */
     public Vec3d velocity;
 
     public Droplet() {
@@ -31,21 +34,39 @@ public class Droplet implements SpatialStructure.SpatialItem {
         var yMax = VoxelShapes.calculateMaxOffset(Direction.Axis.Y, selfBox, collisions, y);
         var zMax = VoxelShapes.calculateMaxOffset(Direction.Axis.Z, selfBox, collisions, z);
 
-        var energy = 1f; // Incur loss of energy for each collision
+        var scaleX = 1d;
+        var scaleY = 1d;
+        var scaleZ = 1d;
+
         if (x != xMax) {
-            x *= -1;
-            energy *= FishyBusiness.COLLISION_ENERGY;
+            if (Math.abs(x-xMax) < FishyBusiness.GRAVITY*3) {
+                x = xMax;
+                scaleY *= FishyBusiness.DRAG;
+                scaleZ *= FishyBusiness.DRAG;
+            } else {
+                x *= -FishyBusiness.COLLISION_ENERGY;
+            }
         }
         if (y != yMax) {
-            y *= -1;
-            energy *= FishyBusiness.COLLISION_ENERGY;
+            if (Math.abs(y-yMax) < FishyBusiness.GRAVITY*3) {
+                scaleX *= FishyBusiness.DRAG;
+                y = yMax;
+                scaleZ *= FishyBusiness.DRAG;
+            } else {
+                y *= -FishyBusiness.COLLISION_ENERGY;
+            }
         }
         if (z != zMax) {
-            z *= -1;
-            energy *= FishyBusiness.COLLISION_ENERGY;
+            if (Math.abs(z-zMax) < FishyBusiness.GRAVITY*3) {
+                scaleX *= FishyBusiness.DRAG;
+                scaleY *= FishyBusiness.DRAG;
+                z = zMax;
+            } else {
+                z *= -FishyBusiness.COLLISION_ENERGY;
+            }
         }
 
-        this.velocity = new Vec3d(x, y, z).multiply(energy);
+        this.velocity = new Vec3d(x, y, z).multiply(scaleX, scaleY, scaleZ);
     }
 
     public Box getBox() {
