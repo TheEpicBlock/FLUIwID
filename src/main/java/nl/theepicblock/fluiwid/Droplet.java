@@ -36,6 +36,7 @@ public class Droplet implements SpatialStructure.SpatialItem {
         var scaleX = 1d;
         var scaleY = 1d;
         var scaleZ = 1d;
+        var boosted = false;
 
         if (x != xMax) {
             if (Math.abs(x-xMax) < FishyBusiness.GRAVITY*3) {
@@ -43,6 +44,7 @@ public class Droplet implements SpatialStructure.SpatialItem {
                 scaleY *= FishyBusiness.DRAG;
                 scaleZ *= FishyBusiness.DRAG;
                 y += FishyBusiness.WALL_CLIMB_BOOST;
+                boosted = true;
             } else {
                 x *= -FishyBusiness.COLLISION_ENERGY;
             }
@@ -51,7 +53,10 @@ public class Droplet implements SpatialStructure.SpatialItem {
             if (Math.abs(z-zMax) < FishyBusiness.GRAVITY*3) {
                 scaleX *= FishyBusiness.DRAG;
                 scaleY *= FishyBusiness.DRAG;
-                y += FishyBusiness.WALL_CLIMB_BOOST;
+                if (!boosted) { // Prevent boost from being applied twice
+                    y += FishyBusiness.WALL_CLIMB_BOOST;
+                    boosted = true;
+                }
                 z = zMax;
             } else {
                 z *= -FishyBusiness.COLLISION_ENERGY;

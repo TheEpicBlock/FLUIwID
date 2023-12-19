@@ -2,6 +2,7 @@ package nl.theepicblock.fluiwid;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.annotation.Debug;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public class FishyBusiness {
     public final static float DROPLET_SIZE = 1/16f;
     public final static float GRAVITY = 2f*DELTA_T;
     public final static float COLLISION_ENERGY = 0.5f;
-    public final static float WALL_CLIMB_BOOST = 0.1f; // Blocks/tick²
+    public final static float WALL_CLIMB_BOOST = 1.8f*DELTA_T; // Blocks/tick²
     public final static float DRAG = 0.98f;
     /**
      * Keeps track of water particles
@@ -22,7 +23,7 @@ public class FishyBusiness {
 
     public FishyBusiness(PlayerEntity player) {
         this.player = player;
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 70; i++) {
             var d = new Droplet();
             d.velocity = new Vec3d(Math.random()*0.1f-0.05f, Math.random()*0.1f-0.05f, Math.random()*0.1f-0.05f);
             particles.insert(player.getPos(), d);
@@ -33,23 +34,26 @@ public class FishyBusiness {
         for (var droplet : this.particles) {
             // Repulsion force between particles
             for (var droplet2 : this.particles) {
+                if (droplet2.position.y == droplet.position.y) {
+                    droplet.position = droplet.position.add(0, 0.01, 0);
+                }
                 var delta = droplet.position.subtract(droplet2.position);
-                var length = delta.length();
+                var length = delta.multiply(1, 0.7, 1).length();
                 var direction = delta.normalize();
-                var force = smoothKernel(0.6f, length) * 0.08;
+                var force = smoothKernel(0.65f, length) * (1.2f * DELTA_T);
                 droplet.velocity = droplet.velocity.add(direction.multiply(force));
             }
 
             // Attraction force
-            var delta = droplet.position.subtract(player.getPos().add(0,1.7,0));
+            var delta = droplet.position.subtract(player.getPos().add(0,0.2f,0));
             var length = delta.length();
             var direction = delta.normalize();
-            var force = smoothKernel(7f, length) * -0.12;
-            droplet.velocity = droplet.velocity.add(direction.multiply(force));
+            var force = smoothKernel(7f, length) * -(3f*DELTA_T);
+            droplet.velocity = droplet.velocity.add(clampY(direction.multiply(force)));
 
             // Gravity
             // We cheat a little by removing gravity near the player (and especially under the player)
-            var grav_nearness = (1-0.5*smoothKernel(1f, droplet.position.subtract(player.getPos().add(0, -1, 0)).multiply(1, 0.5, 1).length()));
+            var grav_nearness = (1-smoothKernel(0.5f, droplet.position.subtract(player.getPos().add(0, -1, 0)).multiply(1, 0.4, 1).length()));
             var grav = GRAVITY * grav_nearness;
             droplet.velocity = droplet.velocity.add(0, -grav, 0);
 
@@ -70,6 +74,13 @@ public class FishyBusiness {
         var x = dst / radius;
         var v = Math.max(0, 1 - x*x);
         return v*v*v;
+    }
+
+    public static Vec3d clampY(Vec3d in) {
+        if (in.y < 0) {
+            return in.withAxis(Direction.Axis.Y, 0);
+        }
+        return in;
     }
 
     @Debug
