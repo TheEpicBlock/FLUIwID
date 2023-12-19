@@ -12,8 +12,8 @@ public class FishyBusiness {
     public final static float DELTA_T = 1/20f;
     public final static float DROPLET_SIZE = 1/16f;
     public final static float GRAVITY = 2f*DELTA_T;
-    public final static float COLLISION_ENERGY = 0.5f;
-    public final static float WALL_CLIMB_BOOST = 1.8f*DELTA_T; // Blocks/tick²
+    public final static float COLLISION_ENERGY = 0.2f;
+    public final static float WALL_CLIMB_BOOST = 1.6f*DELTA_T; // Blocks/tick²
     public final static float DRAG = 0.98f;
     /**
      * Keeps track of water particles
@@ -23,7 +23,7 @@ public class FishyBusiness {
 
     public FishyBusiness(PlayerEntity player) {
         this.player = player;
-        for (int i = 0; i < 70; i++) {
+        for (int i = 0; i < 50; i++) {
             var d = new Droplet();
             d.velocity = new Vec3d(Math.random()*0.1f-0.05f, Math.random()*0.1f-0.05f, Math.random()*0.1f-0.05f);
             particles.insert(player.getPos(), d);
@@ -34,9 +34,6 @@ public class FishyBusiness {
         for (var droplet : this.particles) {
             // Repulsion force between particles
             for (var droplet2 : this.particles) {
-                if (droplet2.position.y == droplet.position.y) {
-                    droplet.position = droplet.position.add(0, 0.01, 0);
-                }
                 var delta = droplet.position.subtract(droplet2.position);
                 var length = delta.multiply(1, 0.7, 1).length();
                 var direction = delta.normalize();
@@ -49,7 +46,7 @@ public class FishyBusiness {
             var length = delta.length();
             var direction = delta.normalize();
             var force = smoothKernel(7f, length) * -(3f*DELTA_T);
-            droplet.velocity = droplet.velocity.add(clampY(direction.multiply(force)));
+            droplet.velocity = droplet.velocity.add(clampY(direction.multiply(force).multiply(2,1,2)));
 
             // Gravity
             // We cheat a little by removing gravity near the player (and especially under the player)
