@@ -56,6 +56,8 @@ public class FishyBusiness {
             droplet.velocity = droplet.velocity.multiply(Math.max(0.01, 1-(smoothKernel(3f, droplet.position.subtract(player.getPos().add(0, 0.5, 0)).multiply(1, 0.5, 1).lengthSquared()))*droplet.velocity.lengthSquared()));
 
             droplet.adjustForCollisions(player.getWorld().getCollisions(player, droplet.getBoundsWithMovement()));
+        }
+        for (var droplet : this.particles) {
             droplet.position = droplet.position.add(droplet.velocity.multiply(0.2));
         }
     }
