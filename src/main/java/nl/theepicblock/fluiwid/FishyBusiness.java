@@ -35,7 +35,6 @@ public class FishyBusiness {
                 var delta = droplet.position.subtract(droplet2.position);
                 var length = delta.length();
                 var direction = delta.normalize();
-                // Push with a maximum force of .5 blocks/tick², it'll likely be lower though
                 var force = smoothKernel(0.6f, length) * 0.08;
                 droplet.velocity = droplet.velocity.add(direction.multiply(force));
             }
