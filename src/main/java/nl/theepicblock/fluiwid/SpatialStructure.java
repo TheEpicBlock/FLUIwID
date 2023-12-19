@@ -35,7 +35,7 @@ public class SpatialStructure<T extends SpatialStructure.SpatialItem> implements
         var maxZ = Double.MIN_VALUE;
         var maxX = Double.MIN_VALUE;
         for (var v : this) {
-            var b = v.getBoundsWithMovement();
+            var b = v.getBox();
             minX = Math.min(minX, b.minX);
             minY = Math.min(minY, b.minY);
             minZ = Math.min(minZ, b.minZ);

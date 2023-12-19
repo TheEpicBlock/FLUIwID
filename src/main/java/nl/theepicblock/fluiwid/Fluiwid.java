@@ -2,6 +2,7 @@ package nl.theepicblock.fluiwid;
 
 import net.fabricmc.api.ModInitializer;
 
+import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,5 +12,9 @@ public class Fluiwid implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+	}
+
+	public static Identifier id(String path) {
+		return new Identifier(MOD_ID, path);
 	}
 }
