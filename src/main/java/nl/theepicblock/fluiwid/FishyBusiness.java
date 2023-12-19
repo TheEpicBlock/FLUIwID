@@ -12,6 +12,7 @@ public class FishyBusiness {
     public final static float DROPLET_SIZE = 1/16f;
     public final static float GRAVITY = 2f*DELTA_T;
     public final static float COLLISION_ENERGY = 0.5f;
+    public final static float WALL_CLIMB_BOOST = 0.1f; // Blocks/tick²
     public final static float DRAG = 0.98f;
     /**
      * Keeps track of water particles
@@ -47,8 +48,8 @@ public class FishyBusiness {
             droplet.velocity = droplet.velocity.add(direction.multiply(force));
 
             // Gravity
-            // We cheat a little by removing gravity near the player
-            var grav_nearness = (1-smoothKernel(0.5f, droplet.position.subtract(player.getPos().add(0, 0.5, 0)).multiply(1, 0.5, 1).length()));
+            // We cheat a little by removing gravity near the player (and especially under the player)
+            var grav_nearness = (1-0.5*smoothKernel(1f, droplet.position.subtract(player.getPos().add(0, -1, 0)).multiply(1, 0.5, 1).length()));
             var grav = GRAVITY * grav_nearness;
             droplet.velocity = droplet.velocity.add(0, -grav, 0);
 

@@ -31,7 +31,6 @@ public class Droplet implements SpatialStructure.SpatialItem {
 
         // Calculate the max distance we can move
         var xMax = VoxelShapes.calculateMaxOffset(Direction.Axis.X, selfBox, collisions, x);
-        var yMax = VoxelShapes.calculateMaxOffset(Direction.Axis.Y, selfBox, collisions, y);
         var zMax = VoxelShapes.calculateMaxOffset(Direction.Axis.Z, selfBox, collisions, z);
 
         var scaleX = 1d;
@@ -43,10 +42,22 @@ public class Droplet implements SpatialStructure.SpatialItem {
                 x = xMax;
                 scaleY *= FishyBusiness.DRAG;
                 scaleZ *= FishyBusiness.DRAG;
+                y += FishyBusiness.WALL_CLIMB_BOOST;
             } else {
                 x *= -FishyBusiness.COLLISION_ENERGY;
             }
         }
+        if (z != zMax) {
+            if (Math.abs(z-zMax) < FishyBusiness.GRAVITY*3) {
+                scaleX *= FishyBusiness.DRAG;
+                scaleY *= FishyBusiness.DRAG;
+                y += FishyBusiness.WALL_CLIMB_BOOST;
+                z = zMax;
+            } else {
+                z *= -FishyBusiness.COLLISION_ENERGY;
+            }
+        }
+        var yMax = VoxelShapes.calculateMaxOffset(Direction.Axis.Y, selfBox, collisions, y);
         if (y != yMax) {
             if (Math.abs(y-yMax) < FishyBusiness.GRAVITY*3) {
                 scaleX *= FishyBusiness.DRAG;
@@ -54,15 +65,6 @@ public class Droplet implements SpatialStructure.SpatialItem {
                 scaleZ *= FishyBusiness.DRAG;
             } else {
                 y *= -FishyBusiness.COLLISION_ENERGY;
-            }
-        }
-        if (z != zMax) {
-            if (Math.abs(z-zMax) < FishyBusiness.GRAVITY*3) {
-                scaleX *= FishyBusiness.DRAG;
-                scaleY *= FishyBusiness.DRAG;
-                z = zMax;
-            } else {
-                z *= -FishyBusiness.COLLISION_ENERGY;
             }
         }
 
