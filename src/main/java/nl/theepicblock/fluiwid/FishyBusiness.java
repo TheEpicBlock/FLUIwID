@@ -42,10 +42,11 @@ public class FishyBusiness {
             }
 
             // Attraction force
-            var delta = droplet.position.subtract(player.getPos().add(0,0.2f,0));
+            var delta = droplet.position.subtract(player.getPos().add(0,0.23f,0));
             var length = delta.length();
             var direction = delta.normalize();
             var force = smoothKernel(7f, length) * -(3f*DELTA_T);
+            // TODO add a minimum pull to help prevent water yeeting out of orbit
             droplet.velocity = droplet.velocity.add(clampY(direction.multiply(force).multiply(2,1,2)));
 
             // Gravity
@@ -55,7 +56,7 @@ public class FishyBusiness {
             droplet.velocity = droplet.velocity.add(0, -grav, 0);
 
             // General velocity dampening
-            droplet.velocity = droplet.velocity.multiply(Math.max(0.01, 1-(smoothKernel(3f, droplet.position.subtract(player.getPos().add(0, 0.5, 0)).multiply(1, 0.5, 1).lengthSquared()))*droplet.velocity.lengthSquared()));
+            droplet.velocity = droplet.velocity.multiply(Math.max(0.9, 1-(smoothKernel(3f, droplet.position.subtract(player.getPos().add(0, 0.5, 0)).multiply(1, 0.5, 1).length()))*droplet.velocity.lengthSquared()));
 
             droplet.adjustForCollisions(player.getWorld().getCollisions(player, droplet.getBoundsWithMovement()));
         }
