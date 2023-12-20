@@ -6,7 +6,6 @@ import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.FluidRenderer;
-import net.minecraft.client.render.debug.DebugRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -15,6 +14,9 @@ import net.minecraft.world.World;
 import nl.theepicblock.fluiwid.Droplet;
 import nl.theepicblock.fluiwid.SpatialStructure;
 import org.joml.Vector3f;
+
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class FluiwidRenderer {
     private static final FluidState FLUID = Fluids.WATER.getStill(false);
@@ -26,10 +28,32 @@ public class FluiwidRenderer {
     }
 
     public void render(VertexConsumerProvider vertexConsumerProvider, MatrixStack matrix, Camera camera, World world) {
+        var clusters = new ArrayList<DropletCluster>();
+        d:
+        for (var droplet : particles) {
+            var dropletB = droplet.getBox().expand(DROPLET_RADIUS*5);
+            for (var cluster : clusters) {
+                if (dropletB.intersects(cluster.bounds)) {
+                    cluster.bounds = cluster.bounds.union(dropletB);
+                    cluster.droplets.add(droplet);
+                    continue d;
+                }
+            }
+            // Can't join any cluster
+            var l2 = new ArrayList<Droplet>();
+            l2.add(droplet);
+            clusters.add(new DropletCluster(dropletB, l2));
+        }
+        for (var cluster : clusters) {
+            render(vertexConsumerProvider, matrix, camera, world, cluster);
+        }
+    }
+
+    public void render(VertexConsumerProvider vertexConsumerProvider, MatrixStack matrix, Camera camera, World world, DropletCluster cluster) {
         var buf = vertexConsumerProvider.getBuffer(RenderLayers.getFluidLayer(FLUID));
         var fluidR = (nl.theepicblock.fluiwid.client.mixin.FluidRenderer)new FluidRenderer();
 
-        var bounds = particles.getBoundingBox().expand(DROPLET_RADIUS*5);
+        var bounds = cluster.bounds;
         var pixelBounds = multiply(bounds, 16);
 
         var handler = FluidRenderHandlerRegistry.INSTANCE.get(FLUID.getFluid());
@@ -45,7 +69,7 @@ public class FluiwidRenderer {
                     var coords = new Vec3d(x/16f, y/16f, z/16f).add(1/32f, 1/32f, 1/32f);
                     blockpos.set(coords.x, coords.y, coords.z);
 
-                    if (shouldThisBitchAssPositionContainWaterYesOrNo(coords)) {
+                    if (shouldThisBitchAssPositionContainWaterYesOrNo(coords, cluster)) {
                         var brightness = world.getBrightness(Direction.UP, true);
                         int light = fluidR.invokeGetLight(world, blockpos.down());
                         var biomeColour = BiomeColors.getWaterColor(world, blockpos);
@@ -58,7 +82,7 @@ public class FluiwidRenderer {
                         float blue = brightness * biomeBlue;
                         for (var direction : Direction.values()) {
                             var c2 = coords.add(Vec3d.of(direction.getVector()).multiply(1/16f));
-                            if (!shouldThisBitchAssPositionContainWaterYesOrNo(c2)) {
+                            if (!shouldThisBitchAssPositionContainWaterYesOrNo(c2, cluster)) {
                                 // We should render a side here!
                                 var q = direction.getRotationQuaternion();
                                 var quadCenter = coords.add(Vec3d.of(direction.getVector()).multiply(1/32f)).subtract(camera.getPos()).toVector3f();
@@ -100,9 +124,9 @@ public class FluiwidRenderer {
         }
     }
 
-    private boolean shouldThisBitchAssPositionContainWaterYesOrNo(Vec3d pos) {
+    private boolean shouldThisBitchAssPositionContainWaterYesOrNo(Vec3d pos, DropletCluster cluster) {
         var weight = 0d;
-        for (var droplet : this.particles) {
+        for (var droplet : cluster.droplets) {
             var dst = pos.subtract(droplet.position).length() / DROPLET_RADIUS;
             var x = (1/(dst*dst));
             weight += x*x;
@@ -112,5 +136,15 @@ public class FluiwidRenderer {
 
     private static Box multiply(Box in, double n) {
         return new Box(in.minX * n, in.minY * n, in.minZ * n, in.maxX * n, in.maxY * n, in.maxZ * n);
+    }
+
+    public static final class DropletCluster {
+        private Box bounds;
+        private final ArrayList<Droplet> droplets;
+
+        public DropletCluster(Box bounds, ArrayList<Droplet> droplets) {
+            this.bounds = bounds;
+            this.droplets = droplets;
+        }
     }
 }

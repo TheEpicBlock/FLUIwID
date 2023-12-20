@@ -23,7 +23,7 @@ public class FishyBusiness {
 
     public FishyBusiness(PlayerEntity player) {
         this.player = player;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 50; i++) {
             var d = new Droplet();
             d.velocity = new Vec3d(Math.random()*0.1f-0.05f, Math.random()*0.1f-0.05f, Math.random()*0.1f-0.05f);
             particles.insert(player.getPos(), d);
