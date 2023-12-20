@@ -19,7 +19,7 @@ public class FluiwidClient implements ClientModInitializer {
 				var fluiwidData = ((PlayerDuck)player).getFluiwidData();
 				if (fluiwidData != null) {
 					var renderer = new FluiwidRenderer(fluiwidData.getDroplets());
-					renderer.render(Objects.requireNonNull(ctx.consumers()), ctx.matrixStack(), ctx.camera());
+					renderer.render(Objects.requireNonNull(ctx.consumers()), ctx.matrixStack(), ctx.camera(), ctx.world());
 				}
 			});
 		});
