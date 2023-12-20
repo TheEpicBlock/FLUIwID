@@ -17,7 +17,7 @@ public class FluiwidDebugRenderer implements DebugRenderer.Renderer {
     public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, double cameraX, double cameraY, double cameraZ) {
         var player = client.player;
         if (player == null) return;
-        var data = ((PlayerDuck)player).getFluiwidData();
+        var data = ((PlayerDuck)player).fluiwid$getData();
         if (data == null) return;
 
         for (var droplet : data.getDroplets()) {

@@ -37,7 +37,7 @@ public abstract class AttachWaterData extends PlayerEntity implements PlayerDuck
     }
 
     @Override
-    public @Nullable FishyBusiness getFluiwidData() {
+    public @Nullable FishyBusiness fluiwid$getData() {
         return this.waterData;
     }
 }
