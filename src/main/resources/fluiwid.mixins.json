@@ -1,10 +1,11 @@
 {
-	"required": true,
-	"package": "nl.theepicblock.fluiwid.mixin",
-	"compatibilityLevel": "JAVA_17",
-	"mixins": [
-	],
-	"injectors": {
-		"defaultRequire": 1
+  "required": true,
+  "package": "nl.theepicblock.fluiwid.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "AdjustCamera"
+  ],
+  "injectors": {
+    "defaultRequire": 1
 	}
 }
