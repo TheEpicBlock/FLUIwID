@@ -1,14 +1,9 @@
 package nl.theepicblock.fluiwid;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.annotation.Debug;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.stream.Stream;
 
 public class FishyBusiness {
     public final static float DELTA_T = 1/20f;
@@ -36,6 +31,7 @@ public class FishyBusiness {
 
     public void tick() {
         // Center and camera logic
+        var oldCamDeltaY = camera.y - center.y;
         double x = 0,y = 0,z = 0;
         int i = 0;
         for (var droplet : this.particles) {
@@ -44,7 +40,8 @@ public class FishyBusiness {
             z += droplet.position.z;
             i++;
         }
-        center = new Vec3d(x/i, y/i, z/i);
+        y = y/i;
+        center = new Vec3d(x/i, y, z/i);
         double y2 = y;
         var centerinBox = new Box(center.subtract(0.25, 2, 0.25), center.add(0.25, 1, 0.25));
         for (var droplet : this.particles) {
@@ -54,7 +51,8 @@ public class FishyBusiness {
             }
         }
         center = center.withAxis(Direction.Axis.Y, y);
-        camera = center.withAxis(Direction.Axis.Y, y2);
+        var newCamDeltaY = y2-y;
+        camera = center.withAxis(Direction.Axis.Y, y + newCamDeltaY * 0.01 + oldCamDeltaY * 0.99);
         center = center.add(0, 0, 0); // TODO movement
 
         var attractionPos = center;
