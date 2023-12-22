@@ -17,6 +17,7 @@ public class FishyBusiness {
      */
     private final SpatialStructure<Droplet> particles = new SpatialStructure<>();
     private final PlayerEntity player;
+    public Vec3d movementVec = Vec3d.ZERO;
     public Vec3d center = Vec3d.ZERO;
     public Vec3d camera = Vec3d.ZERO;
 
@@ -42,8 +43,9 @@ public class FishyBusiness {
         }
         y = y/i;
         center = new Vec3d(x/i, y, z/i);
-        double y2 = y;
         var centerinBox = new Box(center.subtract(0.25, 2, 0.25), center.add(0.25, 1, 0.25));
+        double y2 = centerinBox.minY;
+        y = centerinBox.maxY;
         for (var droplet : this.particles) {
             if (centerinBox.contains(droplet.position)) {
                 y = Math.min(y, droplet.position.y);
@@ -53,7 +55,7 @@ public class FishyBusiness {
         center = center.withAxis(Direction.Axis.Y, y);
         var newCamDeltaY = y2-y;
         camera = center.withAxis(Direction.Axis.Y, y + newCamDeltaY * 0.01 + oldCamDeltaY * 0.99);
-        center = center.add(0, 0, 0); // TODO movement
+        center = center.add(movementVec.normalize().multiply(0.15)); // TODO movement
 
         var attractionPos = center;
 
