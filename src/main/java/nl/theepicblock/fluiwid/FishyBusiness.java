@@ -4,6 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShapes;
 
 public class FishyBusiness {
     public final static float DELTA_T = 1/20f;
@@ -11,7 +12,7 @@ public class FishyBusiness {
     public final static float GRAVITY = 2f*DELTA_T;
     public final static float COLLISION_ENERGY = 0.2f;
     public final static float WALL_CLIMB_BOOST = 1.6f*DELTA_T; // Blocks/tick²
-    public final static float DRAG = 0.98f;
+    public final static float DRAG = 0.99f;
     /**
      * Keeps track of water particles
      */
@@ -43,15 +44,16 @@ public class FishyBusiness {
         }
         y = y/i;
         center = new Vec3d(x/i, y, z/i);
-        var centerinBox = new Box(center.subtract(0.25, 2, 0.25), center.add(0.25, 1, 0.25));
-        double y2 = centerinBox.minY;
-        y = centerinBox.maxY;
+        var maxinBox = new Box(center.subtract(0.25, 2, 0.25), center.add(0.25, 1, 0.25));
+        var xzz = new Box(center.subtract(1, 3, 1), center.add(1, 1, 1));
+        var mininBox = new Box(center.subtract(5/16f, 0, 5/16f), center.add(5/16f, 0.1, 5/16f)).offset(0, .5, 0);
+        double y2 = maxinBox.minY;
         for (var droplet : this.particles) {
-            if (centerinBox.contains(droplet.position)) {
-                y = Math.min(y, droplet.position.y);
+            if (maxinBox.contains(droplet.position)) {
                 y2 = Math.max(y2, droplet.position.y);
             }
         }
+        y += VoxelShapes.calculateMaxOffset(Direction.Axis.Y, mininBox, player.getWorld().getCollisions(player, xzz), -4) + 0.5;
         center = center.withAxis(Direction.Axis.Y, y);
         var newCamDeltaY = y2-y;
         camera = center.withAxis(Direction.Axis.Y, y + newCamDeltaY * 0.01 + oldCamDeltaY * 0.99);
