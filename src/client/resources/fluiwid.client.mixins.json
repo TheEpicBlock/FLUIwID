@@ -6,7 +6,8 @@
     "AdjustCamera",
     "AttachWaterData",
     "DebugRenderer",
-    "FluidRenderer"
+    "FluidRenderer",
+    "OnTeleportPacket"
   ],
   "injectors": {
     "defaultRequire": 1

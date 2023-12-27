@@ -95,6 +95,13 @@ public class FishyBusiness {
         }
     }
 
+    public void teleport(Vec3d pos) {
+        // TODO gosh this is a lot of force
+        for (var droplet : this.particles) {
+            droplet.position = pos;
+        }
+    }
+
     /**
      * Thank you Sebastian Lague xoxo
      */
