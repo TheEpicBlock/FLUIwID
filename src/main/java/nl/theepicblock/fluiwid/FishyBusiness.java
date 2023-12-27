@@ -48,7 +48,7 @@ public class FishyBusiness {
         }
         y = y/i;
         var center = new Vec3d(x/i, y, z/i);
-        var maxinBox = new Box(center.subtract(0.5, 2, 0.5), center.add(0.5, 2, 0.5));
+        var maxinBox = new Box(center.subtract(1, 2, 1), center.add(1, 2, 1));
         var xzz = new Box(center.subtract(1, 3, 1), center.add(1, 1, 1));
         var mininBox = new Box(center.subtract(5/16f, 0, 5/16f), center.add(5/16f, 0.1, 5/16f)).offset(0, .5, 0);
         x = 0;
@@ -80,7 +80,7 @@ public class FishyBusiness {
             var soothingFactor = smoothKernel(30, movingTicks);
             canonPosition = center.multiply(1-soothingFactor).add(canonPosition.multiply(soothingFactor));
         }
-        camera = canonPosition.withAxis(Direction.Axis.Y, y + newCamDeltaY * 0.01 + oldCamDeltaY * 0.99);
+        camera = canonPosition.withAxis(Direction.Axis.Y, y + newCamDeltaY);
 
         var attractionPos = canonPosition.add(movementVec.normalize().multiply(0.3)).add(0, 0.05, 0);
 
@@ -88,18 +88,17 @@ public class FishyBusiness {
             // Repulsion force between particles
             for (var droplet2 : this.particles) {
                 var delta = droplet.position.subtract(droplet2.position);
-                var length = Math.max(0, delta.multiply(1, 0.9, 1).length() - 0.12);
+                var length = Math.max(0, delta.multiply(1.5, 1, 1.5).length() - 0.17);
                 var direction = delta.normalize();
-                var force = smoothKernel(0.7f, length) * (1f * DELTA_T);
+                var force = smoothKernel(0.6f, length) * (4.2f * DELTA_T);
                 droplet.velocity = droplet.velocity.add(direction.multiply(force));
             }
 
             // Attraction force
-            var delta = droplet.position.subtract(attractionPos.add(0,0.23f,0));
+            var delta = droplet.position.subtract(attractionPos.add(0,0.01f,0));
             var length = delta.length();
             var direction = delta.normalize();
             var force = smoothKernel(7f, length) * -(4f*DELTA_T);
-            // TODO add a minimum pull to help prevent water yeeting out of orbit
             droplet.velocity = droplet.velocity.add(clampY(direction.multiply(force).multiply(2,1,2)));
 
             // Gravity
