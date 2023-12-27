@@ -1,11 +1,16 @@
 package nl.theepicblock.fluiwid;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockCollisionSpliterator;
+import net.minecraft.world.CollisionView;
+import org.apache.commons.lang3.stream.Streams;
+import org.jetbrains.annotations.Nullable;
 
 public class FishyBusiness {
     public final static float DELTA_T = 1/20f;
@@ -87,23 +92,33 @@ public class FishyBusiness {
 
         var attractionPos = canonPosition.add(movementVec.normalize().multiply(0.3));
 
-        // Find y again with these values
-        // TODO activate only when going through gaps
-        boolean a = false;
-        maxinBox = new Box(attractionPos.subtract(0.1, 2, 0.1), attractionPos.add(0.1, 2, 0.1));
-        for (var droplet : this.particles) {
-            if (maxinBox.contains(droplet.position)) {
-                if (!a) {
-                    y = Double.POSITIVE_INFINITY;
-                    y2 = Double.NEGATIVE_INFINITY;
-                    a = true;
+        this.center = attractionPos;
+        boolean crammingThroughGap = false;
+        if (anyCollide(player.getWorld(), player, new Box(attractionPos.subtract(0.1, 0, 0.1), attractionPos.add(0.1, 0.1, 0.1)))) {
+            Vec3d finalAttractionPos = attractionPos;
+            if (Streams.of(particles).anyMatch(p -> movementVec.dotProduct(p.position.subtract(canonPosition.add(movementVec.normalize().multiply(0.1)))) > 0)) {
+                // This code should only activate if the player is going through a gap
+                crammingThroughGap = true;
+                // Boost movement
+                attractionPos = attractionPos.add(movementVec.normalize().multiply(0.3));
+                // Find y again with these values
+                boolean a = false;
+                maxinBox = new Box(attractionPos.subtract(0.1, 2, 0.1), attractionPos.add(0.1, 2, 0.1));
+                for (var droplet : this.particles) {
+                    if (maxinBox.contains(droplet.position)) {
+                        if (!a) {
+                            y = Double.POSITIVE_INFINITY;
+                            y2 = Double.NEGATIVE_INFINITY;
+                            a = true;
+                        }
+                        y = Math.min(y, droplet.position.y);
+                        y2 = Math.max(y2, droplet.position.y);
+                    }
                 }
-                y = Math.min(y, droplet.position.y);
-                y2 = Math.max(y2, droplet.position.y);
+                if (a) {
+                    attractionPos = attractionPos.withAxis(Direction.Axis.Y, y);
+                }
             }
-        }
-        if (a) {
-            attractionPos = attractionPos.withAxis(Direction.Axis.Y, y);
         }
         camera = canonPosition.withAxis(Direction.Axis.Y, cameraY.add(y2));
         attractionPos = attractionPos.add(0, 0.05, 0);
@@ -116,7 +131,7 @@ public class FishyBusiness {
                 var delta = droplet.position.subtract(droplet2.position);
                 var length = Math.max(0, delta.multiply(1.5, 1, 1.5).length() - 0.17);
                 var direction = delta.normalize();
-                var force = smoothKernel(0.6f, length) * (4.2f * DELTA_T);
+                var force = smoothKernel(0.6f, length) * (crammingThroughGap ? (1.2 * DELTA_T) : (4.2f * DELTA_T));
                 droplet.velocity = droplet.velocity.add(direction.multiply(force));
             }
 
@@ -136,7 +151,8 @@ public class FishyBusiness {
             // General velocity dampening
             droplet.velocity = droplet.velocity.multiply(Math.max(0.9, 1-(smoothKernel(3f, droplet.position.subtract(attractionPos.add(0, 0.5, 0)).multiply(1, 0.5, 1).length()))*droplet.velocity.lengthSquared()));
 
-            droplet.adjustForCollisions(attractionPos, player.getWorld().getCollisions(player, droplet.getBoundsWithMovement()));
+            var dropletClimbOrigin = crammingThroughGap ? attractionPos.subtract(0, 2, 0) : attractionPos;
+            droplet.adjustForCollisions(dropletClimbOrigin, player.getWorld().getCollisions(player, droplet.getBoundsWithMovement()));
         }
         for (var droplet : this.particles) {
             droplet.position = droplet.position.add(droplet.velocity.multiply(0.2));
@@ -192,5 +208,17 @@ public class FishyBusiness {
             }
         }
         return a;
+    }
+
+    static private boolean anyCollide(CollisionView view, @Nullable Entity entity, Box box) {
+        BlockCollisionSpliterator<VoxelShape> blockCollisionSpliterator = new BlockCollisionSpliterator<>(view, entity, box, false, (pos, voxelShape) -> voxelShape);
+
+        while(blockCollisionSpliterator.hasNext()) {
+            if (!blockCollisionSpliterator.next().isEmpty()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
