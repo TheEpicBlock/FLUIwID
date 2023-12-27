@@ -47,17 +47,25 @@ public class FishyBusiness {
         var maxinBox = new Box(center.subtract(0.25, 2, 0.25), center.add(0.25, 1, 0.25));
         var xzz = new Box(center.subtract(1, 3, 1), center.add(1, 1, 1));
         var mininBox = new Box(center.subtract(5/16f, 0, 5/16f), center.add(5/16f, 0.1, 5/16f)).offset(0, .5, 0);
+        x = 0;
+        z = 0;
+        i = 0;
         double y2 = maxinBox.minY;
         for (var droplet : this.particles) {
             if (maxinBox.contains(droplet.position)) {
                 y2 = Math.max(y2, droplet.position.y);
+                x += droplet.position.x;
+                z += droplet.position.z;
+                i++;
             }
         }
         y += VoxelShapes.calculateMaxOffset(Direction.Axis.Y, mininBox, player.getWorld().getCollisions(player, xzz), -4) + 0.5;
-        center = center.withAxis(Direction.Axis.Y, y);
+        if (i != 0) {
+            center = new Vec3d(x/i, y, z/i);
+        }
         var newCamDeltaY = y2-y;
         camera = center.withAxis(Direction.Axis.Y, y + newCamDeltaY * 0.01 + oldCamDeltaY * 0.99);
-        center = center.add(movementVec.normalize().multiply(0.15)); // TODO movement
+        center = center.add(movementVec.normalize().multiply(0.3)); // TODO movement
 
         var attractionPos = center;
 
@@ -93,6 +101,9 @@ public class FishyBusiness {
         for (var droplet : this.particles) {
             droplet.position = droplet.position.add(droplet.velocity.multiply(0.2));
         }
+
+        // Sync pos
+        this.player.setPosition(this.center);
     }
 
     public void teleport(Vec3d pos) {
