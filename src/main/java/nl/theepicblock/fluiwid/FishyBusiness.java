@@ -11,7 +11,7 @@ public class FishyBusiness {
     public final static float DROPLET_SIZE = 1/16f;
     public final static float GRAVITY = 2f*DELTA_T;
     public final static float COLLISION_ENERGY = 0.2f;
-    public final static float WALL_CLIMB_BOOST = 1.9f*DELTA_T; // Blocks/tick²
+    public final static float WALL_CLIMB_BOOST = 2.1f*DELTA_T; // Blocks/tick²
     public final static float DRAG = 0.99f;
     /**
      * Keeps track of water particles
@@ -49,6 +49,7 @@ public class FishyBusiness {
         y = y/i;
         var center = new Vec3d(x/i, y, z/i);
         var maxinBox = new Box(center.subtract(1, 2, 1), center.add(1, 2, 1));
+        var avBox = new Box(center.subtract(0.2, 2, 0.2), center.add(0.2, 2, 0.2));
         var xzz = new Box(center.subtract(1, 3, 1), center.add(1, 1, 1));
         var mininBox = new Box(center.subtract(5/16f, 0, 5/16f), center.add(5/16f, 0.1, 5/16f)).offset(0, .5, 0);
         x = 0;
@@ -58,6 +59,8 @@ public class FishyBusiness {
         for (var droplet : this.particles) {
             if (maxinBox.contains(droplet.position)) {
                 y2 = Math.max(y2, droplet.position.y);
+            }
+            if (avBox.contains(droplet.position)) {
                 x += droplet.position.x;
                 z += droplet.position.z;
                 i++;
@@ -110,7 +113,7 @@ public class FishyBusiness {
             // General velocity dampening
             droplet.velocity = droplet.velocity.multiply(Math.max(0.9, 1-(smoothKernel(3f, droplet.position.subtract(attractionPos.add(0, 0.5, 0)).multiply(1, 0.5, 1).length()))*droplet.velocity.lengthSquared()));
 
-            droplet.adjustForCollisions(player.getWorld().getCollisions(player, droplet.getBoundsWithMovement()));
+            droplet.adjustForCollisions(attractionPos, player.getWorld().getCollisions(player, droplet.getBoundsWithMovement()));
         }
         for (var droplet : this.particles) {
             droplet.position = droplet.position.add(droplet.velocity.multiply(0.2));

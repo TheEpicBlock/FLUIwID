@@ -23,7 +23,7 @@ public class Droplet implements SpatialStructure.SpatialItem {
         this.position = pos;
     }
 
-    public void adjustForCollisions(Iterable<VoxelShape> collisions) {
+    public void adjustForCollisions(Vec3d attractionPos, Iterable<VoxelShape> collisions) {
         double x = velocity.x;
         double y = velocity.y;
         double z = velocity.z;
@@ -43,8 +43,10 @@ public class Droplet implements SpatialStructure.SpatialItem {
                 x = xMax;
                 scaleY *= FishyBusiness.DRAG;
                 scaleZ *= FishyBusiness.DRAG;
-                y += FishyBusiness.WALL_CLIMB_BOOST;
-                boosted = true;
+                if (this.position.y-attractionPos.y < 2) {
+                    y += FishyBusiness.WALL_CLIMB_BOOST;
+                    boosted = true;
+                }
             } else {
                 x *= -FishyBusiness.COLLISION_ENERGY;
             }
@@ -53,7 +55,7 @@ public class Droplet implements SpatialStructure.SpatialItem {
             if (Math.abs(z-zMax) < FishyBusiness.GRAVITY*3) {
                 scaleX *= FishyBusiness.DRAG;
                 scaleY *= FishyBusiness.DRAG;
-                if (!boosted) { // Prevent boost from being applied twice
+                if (!boosted && this.position.y-attractionPos.y < 2) { // Prevent boost from being applied twice
                     y += FishyBusiness.WALL_CLIMB_BOOST;
                     boosted = true;
                 }
@@ -81,6 +83,6 @@ public class Droplet implements SpatialStructure.SpatialItem {
     }
 
     public Box getBoundsWithMovement() {
-        return this.getBox().stretch(this.velocity).union(this.getBox().stretch(this.velocity.add(0, FishyBusiness.WALL_CLIMB_BOOST,0)));
+        return this.getBox().stretch(this.velocity).union(this.getBox().stretch(this.velocity.add(0, FishyBusiness.WALL_CLIMB_BOOST,0))).expand(0.05);
     }
 }
