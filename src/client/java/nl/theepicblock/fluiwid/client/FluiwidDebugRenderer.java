@@ -25,7 +25,7 @@ public class FluiwidDebugRenderer implements DebugRenderer.Renderer {
             var box = droplet.getBox();
             DebugRenderer.drawBox(matrices, vertexConsumers, box.offset(-cameraX, -cameraY, -cameraZ), 1f, 1f, 0f, 1f);
         }
-        DebugRenderer.drawBox(matrices, vertexConsumers, new Box(data.canonPosition, data.canonPosition.add(0, 1, 0)).expand(0.05).offset(-cameraX, -cameraY, -cameraZ), 0, 1, 1, 1);
+        DebugRenderer.drawBox(matrices, vertexConsumers, new Box(data.center, data.center.add(0, 0.5, 0)).expand(0.01).offset(-cameraX, -cameraY, -cameraZ), 0, 1, 1, 1);
         DebugRenderer.drawBox(matrices, vertexConsumers, new Box(data.camera, data.camera).expand(0.05).offset(-cameraX, -cameraY, -cameraZ), 1, 0, 0, 1);
     }
 }

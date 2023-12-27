@@ -22,6 +22,7 @@ public class FishyBusiness {
     public Vec3d canonPosition = Vec3d.ZERO;
     public Vec3d camera = Vec3d.ZERO;
     public Vec3d prevCamera = Vec3d.ZERO;
+    public Vec3d center = Vec3d.ZERO;
     public int movingTicks = 0;
 
     public FishyBusiness(PlayerEntity player) {
@@ -69,12 +70,15 @@ public class FishyBusiness {
         var newCamDeltaY = y2-y;
 
         // Resist moving the canon position if the player isn't holding any input
+        this.center = center;
         if (movementVec.horizontalLengthSquared() > 0.1 || center.subtract(canonPosition).lengthSquared() > 1) {
             movingTicks++;
-            var soothingFactor = smoothKernel(8, movingTicks);
-            canonPosition = center.multiply(1-soothingFactor).add(canonPosition.multiply(soothingFactor));
         } else {
-            movingTicks = 0;
+            movingTicks = Math.max(0, Math.min(20, movingTicks - 1));
+        }
+        if (movingTicks > 0) {
+            var soothingFactor = smoothKernel(30, movingTicks);
+            canonPosition = center.multiply(1-soothingFactor).add(canonPosition.multiply(soothingFactor));
         }
         camera = canonPosition.withAxis(Direction.Axis.Y, y + newCamDeltaY * 0.01 + oldCamDeltaY * 0.99);
 
