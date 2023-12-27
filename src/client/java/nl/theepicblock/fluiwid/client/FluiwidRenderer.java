@@ -50,6 +50,7 @@ public class FluiwidRenderer {
     }
 
     public void render(VertexConsumerProvider vertexConsumerProvider, MatrixStack matrix, Camera camera, World world, DropletCluster cluster) {
+//        if (true) {return;}
         var buf = vertexConsumerProvider.getBuffer(RenderLayers.getFluidLayer(FLUID));
         var fluidR = (nl.theepicblock.fluiwid.client.mixin.FluidRenderer)new FluidRenderer();
 
