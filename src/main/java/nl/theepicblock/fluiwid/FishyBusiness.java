@@ -23,6 +23,7 @@ public class FishyBusiness {
     public Vec3d camera = Vec3d.ZERO;
     public Vec3d prevCamera = Vec3d.ZERO;
     public Vec3d center = Vec3d.ZERO;
+    private RollingAverage cameraY = new RollingAverage(25);
     public int movingTicks = 0;
 
     public FishyBusiness(PlayerEntity player) {
@@ -37,7 +38,6 @@ public class FishyBusiness {
     public void tick() {
         // Center and camera logic
         this.prevCamera = this.camera;
-        var oldCamDeltaY = camera.y - canonPosition.y;
         double x = 0,y = 0,z = 0;
         int i = 0;
         for (var droplet : this.particles) {
@@ -67,7 +67,6 @@ public class FishyBusiness {
         if (i != 0) {
             center = new Vec3d(x/i, y, z/i);
         }
-        var newCamDeltaY = y2-y;
 
         // Resist moving the canon position if the player isn't holding any input
         this.center = center;
@@ -80,13 +79,14 @@ public class FishyBusiness {
             var soothingFactor = smoothKernel(30, movingTicks);
             canonPosition = center.multiply(1-soothingFactor).add(canonPosition.multiply(soothingFactor));
         }
-        camera = canonPosition.withAxis(Direction.Axis.Y, y + newCamDeltaY);
+        camera = canonPosition.withAxis(Direction.Axis.Y, cameraY.add(y2));
 
         var attractionPos = canonPosition.add(movementVec.normalize().multiply(0.3)).add(0, 0.05, 0);
 
         for (var droplet : this.particles) {
             // Repulsion force between particles
             for (var droplet2 : this.particles) {
+                if (droplet.velocity.length() > 1.5) break;
                 var delta = droplet.position.subtract(droplet2.position);
                 var length = Math.max(0, delta.multiply(1.5, 1, 1.5).length() - 0.17);
                 var direction = delta.normalize();
