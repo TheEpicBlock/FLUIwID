@@ -4,6 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 
 public class FishyBusiness {
@@ -52,6 +53,7 @@ public class FishyBusiness {
         var avBox = new Box(center.subtract(0.2, 2, 0.2), center.add(0.2, 2, 0.2));
         var xzz = new Box(center.subtract(1, 3, 1), center.add(1, 1, 1));
         var mininBox = new Box(center.subtract(5/16f, 0, 5/16f), center.add(5/16f, 0.1, 5/16f)).offset(0, .5, 0);
+        mininBox = subtractAll(mininBox, player.getWorld().getCollisions(player, mininBox));
         x = 0;
         z = 0;
         i = 0;
@@ -82,10 +84,31 @@ public class FishyBusiness {
             var soothingFactor = smoothKernel(30, movingTicks);
             canonPosition = center.multiply(1-soothingFactor).add(canonPosition.multiply(soothingFactor));
         }
+
+        var attractionPos = canonPosition.add(movementVec.normalize().multiply(0.3));
+
+        // Find y again with these values
+        // TODO activate only when going through gaps
+        boolean a = false;
+        maxinBox = new Box(attractionPos.subtract(0.1, 2, 0.1), attractionPos.add(0.1, 2, 0.1));
+        for (var droplet : this.particles) {
+            if (maxinBox.contains(droplet.position)) {
+                if (!a) {
+                    y = Double.POSITIVE_INFINITY;
+                    y2 = Double.NEGATIVE_INFINITY;
+                    a = true;
+                }
+                y = Math.min(y, droplet.position.y);
+                y2 = Math.max(y2, droplet.position.y);
+            }
+        }
+        if (a) {
+            attractionPos = attractionPos.withAxis(Direction.Axis.Y, y);
+        }
         camera = canonPosition.withAxis(Direction.Axis.Y, cameraY.add(y2));
+        attractionPos = attractionPos.add(0, 0.05, 0);
 
-        var attractionPos = canonPosition.add(movementVec.normalize().multiply(0.3)).add(0, 0.05, 0);
-
+        // Fluid logic:
         for (var droplet : this.particles) {
             // Repulsion force between particles
             for (var droplet2 : this.particles) {
@@ -148,5 +171,26 @@ public class FishyBusiness {
 
     public SpatialStructure<Droplet> getDroplets() {
         return particles;
+    }
+
+    /**
+     * Subtracts all voxelshape boxes from {@code a} (only horizontally)
+     */
+    private Box subtractAll(Box a, Iterable<VoxelShape> collisions) {
+        for (var i : collisions) {
+            for (var box : i.getBoundingBoxes()) {
+                if (!a.intersects(box)) continue;
+                if (a.maxX > box.minX && a.minX < box.minX) {
+                    a = new Box(a.minX, a.minY, a.minZ, box.minX, a.maxY, a.maxY);
+                } else if (a.maxZ > box.minZ && a.minZ < box.minZ) {
+                    a = new Box(a.minX, a.minY, a.minZ, a.maxX, box.maxY, a.maxY);
+                } else if (a.minX < box.maxX && a.maxX > box.maxX) {
+                    a = new Box(box.maxX, a.minY, a.minZ, a.maxX, a.maxY, a.maxY);
+                } else if (a.minZ < box.maxZ && a.maxZ > box.maxZ) {
+                    a = new Box(a.minX, a.minY, box.maxZ, a.maxX, a.maxY, a.maxY);
+                }
+            }
+        }
+        return a;
     }
 }
