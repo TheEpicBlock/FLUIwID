@@ -1,6 +1,7 @@
 package nl.theepicblock.fluiwid.mixin;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import nl.theepicblock.fluiwid.PlayerDuck;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +16,11 @@ public class AdjustCamera {
         if (this instanceof PlayerDuck quack) {
             var data = quack.fluiwid$getData();
             if (data != null && data.camera != null) {
-                cir.setReturnValue(data.camera);
+                cir.setReturnValue(new Vec3d(
+                        MathHelper.lerp(tickDelta, data.prevCamera.x, data.prevCamera.x),
+                        MathHelper.lerp(tickDelta, data.prevCamera.y, data.prevCamera.y),
+                        MathHelper.lerp(tickDelta, data.prevCamera.z, data.prevCamera.z)
+                ));
             }
         }
     }
