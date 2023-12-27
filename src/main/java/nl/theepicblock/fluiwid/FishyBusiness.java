@@ -11,7 +11,7 @@ public class FishyBusiness {
     public final static float DROPLET_SIZE = 1/16f;
     public final static float GRAVITY = 2f*DELTA_T;
     public final static float COLLISION_ENERGY = 0.2f;
-    public final static float WALL_CLIMB_BOOST = 1.6f*DELTA_T; // Blocks/tick²
+    public final static float WALL_CLIMB_BOOST = 1.9f*DELTA_T; // Blocks/tick²
     public final static float DRAG = 0.99f;
     /**
      * Keeps track of water particles
@@ -44,7 +44,7 @@ public class FishyBusiness {
         }
         y = y/i;
         center = new Vec3d(x/i, y, z/i);
-        var maxinBox = new Box(center.subtract(0.25, 2, 0.25), center.add(0.25, 1, 0.25));
+        var maxinBox = new Box(center.subtract(0.5, 2, 0.5), center.add(0.5, 2, 0.5));
         var xzz = new Box(center.subtract(1, 3, 1), center.add(1, 1, 1));
         var mininBox = new Box(center.subtract(5/16f, 0, 5/16f), center.add(5/16f, 0.1, 5/16f)).offset(0, .5, 0);
         x = 0;

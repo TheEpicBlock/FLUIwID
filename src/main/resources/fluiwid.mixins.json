@@ -3,7 +3,9 @@
   "package": "nl.theepicblock.fluiwid.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AdjustCamera"
+    "AdjustCamera",
+    "AttachWaterData",
+    "SetNoClip"
   ],
   "injectors": {
     "defaultRequire": 1
