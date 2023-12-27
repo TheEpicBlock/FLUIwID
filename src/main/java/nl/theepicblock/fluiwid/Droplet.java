@@ -64,7 +64,7 @@ public class Droplet implements SpatialStructure.SpatialItem {
         }
         var yMax = VoxelShapes.calculateMaxOffset(Direction.Axis.Y, selfBox, collisions, y);
         if (y != yMax) {
-            if (Math.abs(y-yMax) < FishyBusiness.GRAVITY*3) {
+            if (true) {
                 scaleX *= FishyBusiness.DRAG;
                 y = yMax;
                 scaleZ *= FishyBusiness.DRAG;
@@ -81,6 +81,6 @@ public class Droplet implements SpatialStructure.SpatialItem {
     }
 
     public Box getBoundsWithMovement() {
-        return this.getBox().stretch(this.velocity);
+        return this.getBox().stretch(this.velocity).union(this.getBox().stretch(this.velocity.add(0, FishyBusiness.WALL_CLIMB_BOOST,0)));
     }
 }
