@@ -78,15 +78,15 @@ public class FishyBusiness {
         }
         camera = canonPosition.withAxis(Direction.Axis.Y, y + newCamDeltaY * 0.01 + oldCamDeltaY * 0.99);
 
-        var attractionPos = canonPosition.add(movementVec.normalize().multiply(0.3));
+        var attractionPos = canonPosition.add(movementVec.normalize().multiply(0.3)).add(0, 0.05, 0);
 
         for (var droplet : this.particles) {
             // Repulsion force between particles
             for (var droplet2 : this.particles) {
                 var delta = droplet.position.subtract(droplet2.position);
-                var length = delta.multiply(1, 0.7, 1).length();
+                var length = Math.max(0, delta.multiply(1, 0.9, 1).length() - 0.12);
                 var direction = delta.normalize();
-                var force = smoothKernel(0.65f, length) * (1.2f * DELTA_T);
+                var force = smoothKernel(0.7f, length) * (1f * DELTA_T);
                 droplet.velocity = droplet.velocity.add(direction.multiply(force));
             }
 
@@ -94,7 +94,7 @@ public class FishyBusiness {
             var delta = droplet.position.subtract(attractionPos.add(0,0.23f,0));
             var length = delta.length();
             var direction = delta.normalize();
-            var force = smoothKernel(7f, length) * -(3f*DELTA_T);
+            var force = smoothKernel(7f, length) * -(4f*DELTA_T);
             // TODO add a minimum pull to help prevent water yeeting out of orbit
             droplet.velocity = droplet.velocity.add(clampY(direction.multiply(force).multiply(2,1,2)));
 
