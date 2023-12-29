@@ -6,7 +6,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 
-public class Droplet implements SpatialStructure.SpatialItem {
+public class Droplet implements SpatialStructure.SpatialItem, KDItem {
     private static final float SIZE = FishyBusiness.DROPLET_SIZE;
     public Vec3d position;
     /**
@@ -81,6 +81,11 @@ public class Droplet implements SpatialStructure.SpatialItem {
         }
 
         this.velocity = new Vec3d(x, y, z).multiply(scaleX, scaleY, scaleZ);
+    }
+
+    @Override
+    public Vec3d getPos() {
+        return this.position;
     }
 
     public Box getBox() {

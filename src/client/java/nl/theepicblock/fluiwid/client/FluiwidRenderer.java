@@ -10,9 +10,13 @@ import net.minecraft.client.render.block.FluidRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import nl.theepicblock.fluiwid.Droplet;
+import nl.theepicblock.fluiwid.KDTree;
 import nl.theepicblock.fluiwid.SpatialStructure;
 import org.joml.Vector3f;
 
@@ -21,6 +25,7 @@ import java.util.ArrayList;
 public class FluiwidRenderer {
     private static final FluidState FLUID = Fluids.WATER.getStill(false);
     private static final double DROPLET_RADIUS = 0.2d;
+    private static final double MAX_DROPLET_RADIUS = 3*DROPLET_RADIUS;
     private final SpatialStructure<Droplet> particles;
 
     public FluiwidRenderer(SpatialStructure<Droplet> particles) {
@@ -31,7 +36,7 @@ public class FluiwidRenderer {
         var clusters = new ArrayList<DropletCluster>();
         d:
         for (var droplet : particles) {
-            var dropletB = droplet.getBox().expand(DROPLET_RADIUS*5);
+            var dropletB = droplet.getBox().expand(MAX_DROPLET_RADIUS-DROPLET_RADIUS);
             for (var cluster : clusters) {
                 if (dropletB.intersects(cluster.bounds)) {
                     cluster.bounds = cluster.bounds.union(dropletB);
@@ -51,6 +56,7 @@ public class FluiwidRenderer {
 
     public void render(VertexConsumerProvider vertexConsumerProvider, MatrixStack matrix, Camera camera, World world, DropletCluster cluster) {
 //        if (true) {return;}
+        var tree = KDTree.construct(cluster.droplets);
         var buf = vertexConsumerProvider.getBuffer(RenderLayers.getFluidLayer(FLUID));
         var fluidR = (nl.theepicblock.fluiwid.client.mixin.FluidRenderer)new FluidRenderer();
 
@@ -73,10 +79,10 @@ public class FluiwidRenderer {
                     var coords = new Vec3d(x/16f, y/16f, z/16f).add(1/32f, 1/32f, 1/32f);
                     blockpos.set(coords.x, coords.y, coords.z);
 
-                    if (shouldThisBitchAssPositionContainWaterYesOrNo(coords, cluster)) {
+                    if (shouldThisBitchAssPositionContainWaterYesOrNo(coords, tree)) {
                         for (var direction : Direction.values()) {
                             var c2 = coords.add(Vec3d.of(direction.getVector()).multiply(1/16f));
-                            if (!shouldThisBitchAssPositionContainWaterYesOrNo(c2, cluster)) {
+                            if (!shouldThisBitchAssPositionContainWaterYesOrNo(c2, tree)) {
                                 // We should render a side here!
                                 int light = lightCache.computeIfAbsent(blockpos.asLong(), l ->
                                         fluidR.invokeGetLight(world, blockpos.down())
@@ -132,14 +138,21 @@ public class FluiwidRenderer {
         }
     }
 
-    private boolean shouldThisBitchAssPositionContainWaterYesOrNo(Vec3d pos, DropletCluster cluster) {
-        var weight = 0d;
-        for (var droplet : cluster.droplets) {
-            var dst = pos.subtract(droplet.position).length() / DROPLET_RADIUS;
-            var x = (1/(dst*dst));
-            weight += x*x;
-        }
-        return weight >= 1;
+    private static final Double DROPLET_CUBED = (DROPLET_RADIUS * DROPLET_RADIUS * DROPLET_RADIUS * DROPLET_RADIUS);
+    private static Double WEIGHT = 0d;
+    private boolean shouldThisBitchAssPositionContainWaterYesOrNo(Vec3d pos, KDTree<Droplet> nodes) {
+        WEIGHT = 0d;
+        nodes.rangeSearch(new Box(pos, pos).expand(MAX_DROPLET_RADIUS), droplet -> {
+            // x = 1/((|pos-droplet.pos|/DROPLET_RADIUS)²)
+            // x = 1/(|pos-droplet.pos|²/DROPLET_RADIUS²)
+            // x = DROPLET_RADIUS² / |pos-droplet.pos|²
+            // weight += x²
+            // weight += DROPLET_RADIUS⁴ / (|pos-droplet.pos|²)²
+            var lengthSq = pos.subtract(droplet.position).lengthSquared();
+            WEIGHT += DROPLET_CUBED / (lengthSq * lengthSq);
+            return WEIGHT >= 1;
+        });
+        return WEIGHT >= 1;
     }
 
     private static Box multiply(Box in, double n) {
