@@ -1,6 +1,7 @@
 package nl.theepicblock.fluiwid.client;
 
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.client.render.Camera;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 public class FluiwidRenderer {
     private static final FluidState FLUID = Fluids.WATER.getStill(false);
     private static final float VOXEL_SIZE = 1/8f;
-    private static final double DROPLET_RADIUS = 0.2d;
+    private static final double DROPLET_RADIUS = 0.15d;
     private static final double MAX_DROPLET_RADIUS = 3*DROPLET_RADIUS;
     private final SpatialStructure<Droplet> particles;
 
@@ -35,7 +36,7 @@ public class FluiwidRenderer {
         var clusters = new ArrayList<DropletCluster>();
         d:
         for (var droplet : particles) {
-            var dropletB = droplet.getBox().expand(MAX_DROPLET_RADIUS-DROPLET_RADIUS);
+            var dropletB = droplet.getBox().expand(MAX_DROPLET_RADIUS);
             for (var cluster : clusters) {
                 if (dropletB.intersects(cluster.bounds)) {
                     cluster.bounds = cluster.bounds.union(dropletB);
@@ -48,6 +49,18 @@ public class FluiwidRenderer {
             l2.add(droplet);
             clusters.add(new DropletCluster(dropletB, l2));
         }
+        for (var i = 0; i < clusters.size(); i++) {
+            for (var j = i+1; j < clusters.size(); j++) {
+                var a = clusters.get(i);
+                var b = clusters.get(j);
+                if (a.bounds.intersects(b.bounds)) {
+                    a.bounds = a.bounds.union(b.bounds);
+                    a.droplets.addAll(b.droplets);
+                    clusters.remove(j);
+                    break;
+                }
+            }
+        }
         for (var cluster : clusters) {
             render(vertexConsumerProvider, matrix, camera, world, cluster);
         }
@@ -56,6 +69,7 @@ public class FluiwidRenderer {
     public void render(VertexConsumerProvider vertexConsumerProvider, MatrixStack matrix, Camera camera, World world, DropletCluster cluster) {
 //        if (true) {return;}
         var tree = KDTree.construct(cluster.droplets);
+        CACHE.clear();
         var buf = vertexConsumerProvider.getBuffer(RenderLayers.getFluidLayer(FLUID));
         var fluidR = (nl.theepicblock.fluiwid.client.mixin.FluidRenderer)new FluidRenderer();
 
@@ -137,12 +151,15 @@ public class FluiwidRenderer {
         }
     }
 
-    private static final Double DROPLET_CUBED = (DROPLET_RADIUS * DROPLET_RADIUS * DROPLET_RADIUS * DROPLET_RADIUS);
+    private static final Object2BooleanOpenHashMap<Vec3d> CACHE = new Object2BooleanOpenHashMap<>();
+
     private static Double WEIGHT = 0d;
     private boolean shouldThisBitchAssPositionContainWaterYesOrNo(Vec3d pos, KDTree<Droplet> nodes) {
-        WEIGHT = 0d;
-        rangeSearch(nodes.rootNode, pos, new Box(pos, pos).expand(MAX_DROPLET_RADIUS));
-        return WEIGHT >= 1;
+        return CACHE.computeIfAbsent(pos, (a) -> {
+            WEIGHT = 0d;
+            rangeSearch(nodes.rootNode, pos, new Box(pos, pos).expand(MAX_DROPLET_RADIUS));
+            return WEIGHT >= 1;
+        });
     }
 
     // Copy-pasted from its definition in KDTree and manually inlined for marginal speed benefit
@@ -176,7 +193,7 @@ public class FluiwidRenderer {
             }
         } else if (maybeNode != null) {
             var lengthSq = pos.subtract(((Droplet)maybeNode).position).lengthSquared();
-            WEIGHT += DROPLET_CUBED / (lengthSq * lengthSq);
+            WEIGHT += (DROPLET_RADIUS * DROPLET_RADIUS) / (lengthSq);
             return WEIGHT >= 1;
         }
         return false;
