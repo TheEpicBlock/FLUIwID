@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 public class FluiwidRenderer {
     private static final FluidState FLUID = Fluids.WATER.getStill(false);
+    private static final float VOXEL_SIZE = 1/8f;
     private static final double DROPLET_RADIUS = 0.2d;
     private static final double MAX_DROPLET_RADIUS = 3*DROPLET_RADIUS;
     private final SpatialStructure<Droplet> particles;
@@ -59,7 +60,7 @@ public class FluiwidRenderer {
         var fluidR = (nl.theepicblock.fluiwid.client.mixin.FluidRenderer)new FluidRenderer();
 
         var bounds = cluster.bounds;
-        var pixelBounds = multiply(bounds, 16);
+        var pixelBounds = multiply(bounds, 1 / VOXEL_SIZE);
 
         var handler = FluidRenderHandlerRegistry.INSTANCE.get(FLUID.getFluid());
         var sprite = handler.getFluidSprites(null, null, FLUID)[0];
@@ -74,12 +75,12 @@ public class FluiwidRenderer {
             for (var y = (int)pixelBounds.minY; y <= (int)pixelBounds.maxY; y++) {
                 for (var z = (int)pixelBounds.minZ; z <= (int)pixelBounds.maxZ; z++) {
                     // Convert pixel coords back to world
-                    var coords = new Vec3d(x/16f, y/16f, z/16f).add(1/32f, 1/32f, 1/32f);
+                    var coords = new Vec3d(x*VOXEL_SIZE, y*VOXEL_SIZE, z*VOXEL_SIZE).add(VOXEL_SIZE/2, VOXEL_SIZE/2, VOXEL_SIZE/2);
                     blockpos.set(coords.x, coords.y, coords.z);
 
                     if (shouldThisBitchAssPositionContainWaterYesOrNo(coords, tree)) {
                         for (var direction : Direction.values()) {
-                            var c2 = coords.add(Vec3d.of(direction.getVector()).multiply(1/16f));
+                            var c2 = coords.add(Vec3d.of(direction.getVector()).multiply(VOXEL_SIZE));
                             if (!shouldThisBitchAssPositionContainWaterYesOrNo(c2, tree)) {
                                 // We should render a side here!
                                 int light = lightCache.computeIfAbsent(blockpos.asLong(), l ->
@@ -97,11 +98,11 @@ public class FluiwidRenderer {
                                 float blue = worldBrightness * biomeBlue;
 
                                 var q = direction.getRotationQuaternion();
-                                var quadCenter = coords.add(Vec3d.of(direction.getVector()).multiply(1/32f)).subtract(camera.getPos()).toVector3f();
-                                var corner1 = q.transform(new Vector3f(1/32f, 0, -1/32f)).add(quadCenter);
-                                var corner2 = q.transform(new Vector3f(-1/32f, 0, -1/32f)).add(quadCenter);
-                                var corner3 = q.transform(new Vector3f(-1/32f, 0, 1/32f)).add(quadCenter);
-                                var corner4 = q.transform(new Vector3f(1/32f, 0, 1/32f)).add(quadCenter);
+                                var quadCenter = coords.add(Vec3d.of(direction.getVector()).multiply(VOXEL_SIZE/2)).subtract(camera.getPos()).toVector3f();
+                                var corner1 = q.transform(new Vector3f(VOXEL_SIZE/2, 0, -VOXEL_SIZE/2)).add(quadCenter);
+                                var corner2 = q.transform(new Vector3f(-VOXEL_SIZE/2, 0, -VOXEL_SIZE/2)).add(quadCenter);
+                                var corner3 = q.transform(new Vector3f(-VOXEL_SIZE/2, 0, VOXEL_SIZE/2)).add(quadCenter);
+                                var corner4 = q.transform(new Vector3f(VOXEL_SIZE/2, 0, VOXEL_SIZE/2)).add(quadCenter);
 //                                DebugRenderer.drawBox(matrix, vertexConsumerProvider, new Box(new Vec3d(corner2), new Vec3d(corner4)), 1, 1, 1, 1);
 
                                 buf.vertex(matrix.peek().getPositionMatrix(), corner1.x, corner1.y, corner1.z)
