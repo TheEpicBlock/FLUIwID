@@ -15,9 +15,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import nl.theepicblock.fluiwid.Droplet;
-import nl.theepicblock.fluiwid.KDTree;
-import nl.theepicblock.fluiwid.SpatialStructure;
+import nl.theepicblock.fluiwid.*;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -142,17 +140,45 @@ public class FluiwidRenderer {
     private static Double WEIGHT = 0d;
     private boolean shouldThisBitchAssPositionContainWaterYesOrNo(Vec3d pos, KDTree<Droplet> nodes) {
         WEIGHT = 0d;
-        nodes.rangeSearch(new Box(pos, pos).expand(MAX_DROPLET_RADIUS), droplet -> {
-            // x = 1/((|pos-droplet.pos|/DROPLET_RADIUS)²)
-            // x = 1/(|pos-droplet.pos|²/DROPLET_RADIUS²)
-            // x = DROPLET_RADIUS² / |pos-droplet.pos|²
-            // weight += x²
-            // weight += DROPLET_RADIUS⁴ / (|pos-droplet.pos|²)²
-            var lengthSq = pos.subtract(droplet.position).lengthSquared();
+        rangeSearch(nodes.rootNode, pos, new Box(pos, pos).expand(MAX_DROPLET_RADIUS));
+        return WEIGHT >= 1;
+    }
+
+    // Copy-pasted from its definition in KDTree and manually inlined for marginal speed benefit
+    private static <T extends KDItem> boolean rangeSearch(Object maybeNode, Vec3d pos, Box range) {
+        if (maybeNode instanceof KDNode<?> node) {
+            double min;
+            double max;
+            switch (node.splitAxis) {
+                case X -> {
+                    min = range.minX;
+                    max = range.maxX;
+                }
+                case Y -> {
+                    min = range.minY;
+                    max = range.maxY;
+                }
+                case Z -> {
+                    min = range.minZ;
+                    max = range.maxZ;
+                }
+                default -> throw new RuntimeException("What, who added a fourth dimension to Minecraft. Wtf");
+            }
+
+            if (min <= node.split) {
+                var v = rangeSearch(node.left, pos, range);
+                if (v) return true;
+            }
+            if (max >= node.split) {
+                var v = rangeSearch(node.right, pos, range);
+                if (v) return true;
+            }
+        } else if (maybeNode != null) {
+            var lengthSq = pos.subtract(((Droplet)maybeNode).position).lengthSquared();
             WEIGHT += DROPLET_CUBED / (lengthSq * lengthSq);
             return WEIGHT >= 1;
-        });
-        return WEIGHT >= 1;
+        }
+        return false;
     }
 
     private static Box multiply(Box in, double n) {

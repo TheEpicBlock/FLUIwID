@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class KDTree<T extends KDItem> implements Iterable<T> {
-    private Object rootNode; // Typeof T | KDNode<T> | null
+    public Object rootNode; // Typeof T | KDNode<T> | null
 
     public KDTree() {
     }
