@@ -69,7 +69,7 @@ public class FluiwidRenderer {
     public void render(VertexConsumerProvider vertexConsumerProvider, MatrixStack matrix, Camera camera, World world, DropletCluster cluster) {
 //        if (true) {return;}
         var tree = KDTree.construct(cluster.droplets);
-        CACHE.clear();
+        CACHE = new Object2BooleanOpenHashMap<>();
         var buf = vertexConsumerProvider.getBuffer(RenderLayers.getFluidLayer(FLUID));
         var fluidR = (nl.theepicblock.fluiwid.client.mixin.FluidRenderer)new FluidRenderer();
 
@@ -151,7 +151,7 @@ public class FluiwidRenderer {
         }
     }
 
-    private static final Object2BooleanOpenHashMap<Vec3d> CACHE = new Object2BooleanOpenHashMap<>();
+    private static Object2BooleanOpenHashMap<Vec3d> CACHE = new Object2BooleanOpenHashMap<>();
 
     private static Double WEIGHT = 0d;
     private boolean shouldThisBitchAssPositionContainWaterYesOrNo(Vec3d pos, KDTree<Droplet> nodes) {
