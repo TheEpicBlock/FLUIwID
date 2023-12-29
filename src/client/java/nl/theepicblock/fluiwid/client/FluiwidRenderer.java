@@ -1,5 +1,6 @@
 package nl.theepicblock.fluiwid.client;
 
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.client.render.Camera;
@@ -16,7 +17,6 @@ import nl.theepicblock.fluiwid.SpatialStructure;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class FluiwidRenderer {
     private static final FluidState FLUID = Fluids.WATER.getStill(false);
@@ -50,7 +50,7 @@ public class FluiwidRenderer {
     }
 
     public void render(VertexConsumerProvider vertexConsumerProvider, MatrixStack matrix, Camera camera, World world, DropletCluster cluster) {
-        if (true) {return;}
+//        if (true) {return;}
         var buf = vertexConsumerProvider.getBuffer(RenderLayers.getFluidLayer(FLUID));
         var fluidR = (nl.theepicblock.fluiwid.client.mixin.FluidRenderer)new FluidRenderer();
 
@@ -61,6 +61,9 @@ public class FluiwidRenderer {
         var sprite = handler.getFluidSprites(null, null, FLUID)[0];
         var u = sprite.getFrameU(0.0f);
         var v = sprite.getFrameV(0.0f);
+        var lightCache = new Long2IntOpenHashMap();
+        var biomeCache = new Long2IntOpenHashMap();
+        var worldBrightness = world.getBrightness(Direction.UP, true);
 
         var blockpos = new BlockPos.Mutable();
         for (var x = (int)pixelBounds.minX; x <= (int)pixelBounds.maxX; x++) {
@@ -71,20 +74,24 @@ public class FluiwidRenderer {
                     blockpos.set(coords.x, coords.y, coords.z);
 
                     if (shouldThisBitchAssPositionContainWaterYesOrNo(coords, cluster)) {
-                        var brightness = world.getBrightness(Direction.UP, true);
-                        int light = fluidR.invokeGetLight(world, blockpos.down());
-                        var biomeColour = BiomeColors.getWaterColor(world, blockpos);
-                        float biomeRed = (float)(biomeColour >> 16 & 0xFF) / 255.0F;
-                        float biomeGreen = (float)(biomeColour >> 8 & 0xFF) / 255.0F;
-                        float biomeBlue = (float)(biomeColour & 0xFF) / 255.0F;
-
-                        float red = brightness * biomeRed;
-                        float green = brightness * biomeGreen;
-                        float blue = brightness * biomeBlue;
                         for (var direction : Direction.values()) {
                             var c2 = coords.add(Vec3d.of(direction.getVector()).multiply(1/16f));
                             if (!shouldThisBitchAssPositionContainWaterYesOrNo(c2, cluster)) {
                                 // We should render a side here!
+                                int light = lightCache.computeIfAbsent(blockpos.asLong(), l ->
+                                        fluidR.invokeGetLight(world, blockpos.down())
+                                );
+                                int biomeColour = biomeCache.computeIfAbsent(blockpos.asLong(), l ->
+                                        BiomeColors.getWaterColor(world, blockpos)
+                                );
+                                float biomeRed = (float)(biomeColour >> 16 & 0xFF) / 255.0F;
+                                float biomeGreen = (float)(biomeColour >> 8 & 0xFF) / 255.0F;
+                                float biomeBlue = (float)(biomeColour & 0xFF) / 255.0F;
+
+                                float red = worldBrightness * biomeRed;
+                                float green = worldBrightness * biomeGreen;
+                                float blue = worldBrightness * biomeBlue;
+
                                 var q = direction.getRotationQuaternion();
                                 var quadCenter = coords.add(Vec3d.of(direction.getVector()).multiply(1/32f)).subtract(camera.getPos()).toVector3f();
                                 var corner1 = q.transform(new Vector3f(1/32f, 0, -1/32f)).add(quadCenter);
