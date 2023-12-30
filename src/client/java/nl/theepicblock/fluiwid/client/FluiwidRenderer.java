@@ -70,6 +70,10 @@ public class FluiwidRenderer {
 //        if (true) {return;}
         var tree = KDTree.construct(cluster.droplets);
         CACHE = new Object2BooleanOpenHashMap<>();
+        if (shouldThisBitchAssPositionContainWaterYesOrNo(camera.getPos(), tree)) {
+            // Don't render if the camera's inside the water, it has icky artifacts
+            return;
+        }
         var buf = vertexConsumerProvider.getBuffer(RenderLayers.getFluidLayer(FLUID));
         var fluidR = (nl.theepicblock.fluiwid.client.mixin.FluidRenderer)new FluidRenderer();
 
