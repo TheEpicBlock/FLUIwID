@@ -95,7 +95,6 @@ public class FishyBusiness {
         this.center = attractionPos;
         boolean crammingThroughGap = false;
         if (anyCollide(player.getWorld(), player, new Box(attractionPos.subtract(0.1, 0, 0.1), attractionPos.add(0.1, 0.1, 0.1)))) {
-            Vec3d finalAttractionPos = attractionPos;
             if (Streams.of(particles).anyMatch(p -> movementVec.dotProduct(p.position.subtract(canonPosition.add(movementVec.normalize().multiply(0.1)))) > 0)) {
                 // This code should only activate if the player is going through a gap
                 crammingThroughGap = true;
