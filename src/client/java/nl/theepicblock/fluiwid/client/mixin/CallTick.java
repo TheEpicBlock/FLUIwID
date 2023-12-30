@@ -10,13 +10,10 @@ import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import nl.theepicblock.fluiwid.FishyBusiness;
 import nl.theepicblock.fluiwid.PlayerDuck;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -39,7 +36,7 @@ public abstract class CallTick extends PlayerEntity {
             if (waterData != null) {
                 var chunkManager = this.getWorld().getChunkManager();
                 if (chunkManager.isChunkLoaded(ChunkSectionPos.getSectionCoord(this.getBlockX()), ChunkSectionPos.getSectionCoord(this.getBlockZ()))) {
-                    waterData.tick();
+                    waterData.clientTick();
                 }
             }
         });

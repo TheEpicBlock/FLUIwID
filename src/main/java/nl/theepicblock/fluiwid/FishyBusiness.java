@@ -41,7 +41,7 @@ public class FishyBusiness {
         this.teleport(player.getPos());
     }
 
-    public void tick() {
+    public void clientTick() {
         // Center and camera logic
         this.prevCamera = this.camera;
         double x = 0,y = 0,z = 0;
