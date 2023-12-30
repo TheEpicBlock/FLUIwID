@@ -7,9 +7,14 @@
     "CallTick",
     "DebugRenderer",
     "FluidRenderer",
+    "MakeHandInvis",
     "OnTeleportPacket"
   ],
   "injectors": {
     "defaultRequire": 1
-	}
+  },
+  "mixins": [
+    "MakeInvisibleTwo",
+    "MakePlayerInvisible"
+  ]
 }
