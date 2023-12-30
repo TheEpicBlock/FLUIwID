@@ -6,6 +6,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.util.ClientPlayerTickable;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -36,7 +37,10 @@ public abstract class CallTick extends PlayerEntity {
         this.tickables.add(() -> {
             var waterData = ((PlayerDuck)this).fluiwid$getData();
             if (waterData != null) {
-                waterData.tick();
+                var chunkManager = this.getWorld().getChunkManager();
+                if (chunkManager.isChunkLoaded(ChunkSectionPos.getSectionCoord(this.getBlockX()), ChunkSectionPos.getSectionCoord(this.getBlockZ()))) {
+                    waterData.tick();
+                }
             }
         });
     }

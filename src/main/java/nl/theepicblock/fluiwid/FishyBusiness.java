@@ -158,7 +158,8 @@ public class FishyBusiness {
         }
 
         // Sync pos
-        this.player.setPosition(canonPosition);
+        this.player.setPos(canonPosition.x, canonPosition.y, canonPosition.z);
+        this.player.setVelocity(0,0,0);
     }
 
     public void teleport(Vec3d pos) {
