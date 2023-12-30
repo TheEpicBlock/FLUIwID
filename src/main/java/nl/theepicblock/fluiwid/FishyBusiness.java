@@ -29,16 +29,16 @@ public class FishyBusiness {
     public Vec3d camera = Vec3d.ZERO;
     public Vec3d prevCamera = Vec3d.ZERO;
     public Vec3d center = Vec3d.ZERO;
-    private RollingAverage cameraY = new RollingAverage(25);
+    private final RollingAverage cameraY = new RollingAverage(25);
     public int movingTicks = 0;
 
     public FishyBusiness(PlayerEntity player) {
         this.player = player;
         for (int i = 0; i < 50; i++) {
             var d = new Droplet();
-            d.velocity = new Vec3d(Math.random()*0.1f-0.05f, Math.random()*0.1f-0.05f, Math.random()*0.1f-0.05f);
             particles.insert(player.getPos(), d);
         }
+        this.teleport(player.getPos());
     }
 
     public void tick() {
@@ -162,10 +162,16 @@ public class FishyBusiness {
     }
 
     public void teleport(Vec3d pos) {
-        // TODO gosh this is a lot of force
         for (var droplet : this.particles) {
             droplet.position = pos;
+            droplet.velocity = new Vec3d(Math.random()*0.1f-0.05f, Math.random()*0.1f-0.05f, Math.random()*0.1f-0.05f);
         }
+        this.center = pos;
+        this.canonPosition = pos;
+        this.prevCamera = pos;
+        this.camera = pos;
+        this.cameraY.setAll(pos.y);
+        this.movingTicks = 0;
     }
 
     /**
