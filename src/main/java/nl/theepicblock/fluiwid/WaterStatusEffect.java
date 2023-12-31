@@ -7,4 +7,6 @@ public class WaterStatusEffect extends StatusEffect {
     protected WaterStatusEffect(StatusEffectCategory category, int color) {
         super(category, color);
     }
+
+
 }

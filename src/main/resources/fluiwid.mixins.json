@@ -5,6 +5,7 @@
   "mixins": [
     "AdjustCamera",
     "AttachWaterData",
+    "FixPotionColour",
     "NoSprintParticles",
     "OverridePose",
     "SetNoClip"

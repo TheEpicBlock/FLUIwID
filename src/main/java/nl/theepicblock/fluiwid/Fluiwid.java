@@ -20,8 +20,8 @@ public class Fluiwid implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	public static final StatusEffect WATER_EFFECT = Registry.register(Registries.STATUS_EFFECT, id("water"), new WaterStatusEffect(StatusEffectCategory.BENEFICIAL, 0x9654f9));
-	public static final Potion WATER_POTION = Registry.register(Registries.POTION, id("fluiwid"), new Potion(new StatusEffectInstance(WATER_EFFECT, 3600)));
-	public static final Potion LONG_WATER_POTION = Registry.register(Registries.POTION, id("long_fluiwid"), new Potion("fluiwid", new StatusEffectInstance(WATER_EFFECT, 9600*2)));
+	public static final Potion WATER_POTION = Registry.register(Registries.POTION, id("fluiwid"), new Potion(new StatusEffectInstance(WATER_EFFECT, 3600, 0, false, false, true)));
+	public static final Potion LONG_WATER_POTION = Registry.register(Registries.POTION, id("long_fluiwid"), new Potion("fluiwid", new StatusEffectInstance(WATER_EFFECT, 9600*2, 0, false, false, true)));
 
 	@Override
 	public void onInitialize() {
