@@ -51,6 +51,7 @@ public abstract class CallTick extends PlayerEntity {
             float sin = MathHelper.sin(this.getYaw() * 0.017453292F);
             float cos = MathHelper.cos(this.getYaw() * 0.017453292F);
             waterData.movementVec = new Vec3d(x * (double)cos - z * (double)sin, 0, z * (double)cos + x * (double)sin).normalize();
+            waterData.shifting = this.input.sneaking;
         }
     }
 }

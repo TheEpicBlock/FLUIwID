@@ -25,6 +25,7 @@ public class FishyBusiness {
     private final SpatialStructure<Droplet> particles = new SpatialStructure<>();
     private final PlayerEntity player;
     public Vec3d movementVec = Vec3d.ZERO;
+    public boolean shifting = false;
     public Vec3d canonPosition = Vec3d.ZERO;
     public Vec3d camera = Vec3d.ZERO;
     public Vec3d prevCamera = Vec3d.ZERO;
@@ -161,7 +162,7 @@ public class FishyBusiness {
             // Gravity
             // We cheat a little by removing gravity near the player (and especially under the player)
             var grav_nearness = (1-smoothKernel(0.5f, droplet.position.subtract(attractionPos.add(0, -1, 0)).multiply(1, 0.4, 1).length()));
-            var grav = GRAVITY * grav_nearness;
+            var grav = GRAVITY * grav_nearness * (shifting ? 4 : 1);
             droplet.velocity = droplet.velocity.add(0, -grav, 0);
 
             // General velocity dampening
