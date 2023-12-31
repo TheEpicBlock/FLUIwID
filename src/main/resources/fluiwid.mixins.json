@@ -6,6 +6,7 @@
     "AdjustCamera",
     "AttachWaterData",
     "FixPotionColour",
+    "Invulnerability",
     "NoSprintParticles",
     "OverridePose",
     "SetNoClip"

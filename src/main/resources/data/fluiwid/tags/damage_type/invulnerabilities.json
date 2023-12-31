@@ -1,0 +1,27 @@
+{
+  "values": [
+    "#minecraft:is_explosion",
+    "#minecraft:is_drowning",
+    "#minecraft:is_fall",
+    "#minecraft:is_lightning",
+    "#minecraft:is_projectile",
+    "minecraft:cramming",
+    "minecraft:falling_anvil",
+    "minecraft:falling_block",
+    "minecraft:falling_stalactite",
+    "minecraft:fireball",
+    "minecraft:fireworks",
+    "minecraft:fly_into_wall",
+    "minecraft:in_wall",
+    "minecraft:mob_attack",
+    "minecraft:mob_attack_no_aggro",
+    "minecraft:player_attack",
+    "minecraft:sonic_boom",
+    "minecraft:stalagmite",
+    "minecraft:sting",
+    "minecraft:starve",
+    "minecraft:sweet_berry_bush",
+    "minecraft:thorns",
+    "minecraft:thrown"
+  ]
+}
