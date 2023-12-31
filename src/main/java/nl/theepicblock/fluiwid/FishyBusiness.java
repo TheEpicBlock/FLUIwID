@@ -25,7 +25,7 @@ public class FishyBusiness {
      * Keeps track of water particles
      */
     private final SpatialStructure<Droplet> particles = new SpatialStructure<>();
-    private final PlayerEntity player;
+    public final PlayerEntity player;
     public Vec3d movementVec = Vec3d.ZERO;
     public boolean shifting = false;
     public Vec3d canonPosition = Vec3d.ZERO;

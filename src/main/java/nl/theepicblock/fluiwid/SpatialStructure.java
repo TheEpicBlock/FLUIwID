@@ -11,7 +11,7 @@ import java.util.Spliterator;
 
 // TODO replace with an actually performant spatial structure
 public class SpatialStructure<T extends SpatialStructure.SpatialItem> implements Iterable<T> {
-    private final List<T> backend = new ArrayList<>();
+    public final List<T> backend = new ArrayList<>();
 
     public SpatialStructure() {
     }

@@ -2,12 +2,15 @@ package nl.theepicblock.fluiwid;
 
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.Items;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.Potions;
 import net.minecraft.recipe.BrewingRecipeRegistry;
@@ -15,8 +18,9 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.util.Identifier;
+import nl.theepicblock.fluiwid.packet.UpdateC2SDataPacket;
+import nl.theepicblock.fluiwid.packet.UpdateS2CDataPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +37,20 @@ public class Fluiwid implements ModInitializer {
 	public void onInitialize() {
 		BrewingRecipeRegistry.registerPotionRecipe(Potions.AWKWARD, Items.WATER_BUCKET, WATER_POTION);
 		BrewingRecipeRegistry.registerPotionRecipe(WATER_POTION, Items.GUNPOWDER, LONG_WATER_POTION);
+
+		ServerPlayNetworking.registerGlobalReceiver(UpdateC2SDataPacket.TYPE, (packet, player, responseSender) -> {
+			var data = ((PlayerDuck)player).fluiwid$getData();
+			if (data != null) {
+				packet.apply(data);
+
+				var sendThrough = new UpdateS2CDataPacket(player.getId(), packet.offsets());
+				PlayerLookup.tracking(player).forEach(p -> {
+					if (p != player) {
+						ServerPlayNetworking.send(p, sendThrough);
+					}
+				});
+			}
+		});
 	}
 
 	public static Identifier id(String path) {
