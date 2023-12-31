@@ -7,7 +7,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
 import nl.theepicblock.fluiwid.Fluiwid;
 import nl.theepicblock.fluiwid.PlayerDuck;
+import nl.theepicblock.fluiwid.packet.AddParticlePacket;
 import nl.theepicblock.fluiwid.packet.UpdateS2CDataPacket;
+import nl.theepicblock.fluiwid.packet.YeetParticlePacket;
 
 import java.util.Objects;
 
@@ -36,5 +38,25 @@ public class FluiwidClient implements ClientModInitializer {
 				}
 			}
 		}));
+		ClientPlayNetworking.registerGlobalReceiver(YeetParticlePacket.TYPE, (packet, player, responseSender) -> {
+			if (MinecraftClient.getInstance().world == null) return;
+			var e = MinecraftClient.getInstance().world.getEntityById(packet.entityId());
+			if (e instanceof PlayerDuck quack) {
+				var data = quack.fluiwid$getData();
+				if (data != null) {
+					packet.apply(data);
+				}
+			}
+		});
+		ClientPlayNetworking.registerGlobalReceiver(AddParticlePacket.TYPE, (packet, player, responseSender) -> {
+			if (MinecraftClient.getInstance().world == null) return;
+			var e = MinecraftClient.getInstance().world.getEntityById(packet.entityId());
+			if (e instanceof PlayerDuck quack) {
+				var data = quack.fluiwid$getData();
+				if (data != null) {
+					packet.apply(data);
+				}
+			}
+		});
 	}
 }

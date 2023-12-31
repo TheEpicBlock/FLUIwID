@@ -9,7 +9,8 @@
     "Invulnerability",
     "NoSprintParticles",
     "OverridePose",
-    "SetNoClip"
+    "SetNoClip",
+    "TickServer"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -29,7 +29,7 @@ public record UpdateC2SDataPacket(Vec3d cam, ArrayList<Vector3f> offsets) implem
         data.camera = cam;
         data.prevCamera = cam;
         data.center = data.canonPosition;
-        if (data.getDroplets().backend.size() < offsets.size()) return;
+        if (data.getDroplets().backend.size() > offsets.size()) return;
         for (int i = 0; i < offsets.size(); i++) {
             data.getDroplets().backend.get(i).position = data.canonPosition.add(new Vec3d(offsets.get(i)));
         }

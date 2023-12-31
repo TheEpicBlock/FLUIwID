@@ -6,6 +6,7 @@
     "AdjustCamera",
     "CallTick",
     "DebugRenderer",
+    "UpdateMovement",
     "FluidRenderer",
     "MakeHandInvis",
     "OnTeleportPacket"

@@ -12,7 +12,7 @@ public class Droplet implements SpatialStructure.SpatialItem, KDItem {
     /**
      * Measures in blocks per tick
      */
-    public Vec3d velocity;
+    public Vec3d velocity = Vec3d.ZERO;
 
     public Droplet() {
         this.position = Vec3d.ZERO;

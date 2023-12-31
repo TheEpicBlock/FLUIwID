@@ -1,16 +1,20 @@
 package nl.theepicblock.fluiwid;
 
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FireBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.math.*;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockCollisionSpliterator;
 import net.minecraft.world.CollisionView;
+import nl.theepicblock.fluiwid.packet.AddParticlePacket;
+import nl.theepicblock.fluiwid.packet.YeetParticlePacket;
 import org.apache.commons.lang3.stream.Streams;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,6 +50,11 @@ public class FishyBusiness {
     }
 
     public void clientTick() {
+        if (particles.backend.isEmpty()) {
+            player.kill();
+            return;
+        }
+
         // Center and camera logic
         this.prevCamera = this.camera;
         double x = 0,y = 0,z = 0;
@@ -180,6 +189,59 @@ public class FishyBusiness {
         // Sync pos
         this.player.setPos(canonPosition.x, canonPosition.y, canonPosition.z);
         this.player.setVelocity(0,0,0);
+    }
+
+    public void serverTick() {
+        if (particles.backend.isEmpty()) {
+            player.kill();
+            return;
+        }
+
+        var world = player.getWorld();
+        if (world.getTime() % 2 == 0) {
+            for (int i = 0; i < this.particles.backend.size(); i++) {
+                var droplet = this.particles.backend.get(i);
+                var block = world.getBlockState(BlockPos.ofFloored(droplet.position));
+                if (block.getBlock() == Blocks.FIRE) {
+                    world.setBlockState(BlockPos.ofFloored(droplet.position), Blocks.AIR.getDefaultState());
+                    yeetParticle(i);
+                    break;
+                }
+                if (block.getBlock() == Blocks.LAVA) {
+                    yeetParticle(i);
+                    break;
+                }
+                if (block.getBlock() == Blocks.WATER && this.particles.backend.size() < 50) {
+                    addParticle(droplet.getPos());
+                }
+            }
+        }
+    }
+
+    public void yeetParticle(int index) {
+        if (player instanceof ServerPlayerEntity player) {
+            var packet = new YeetParticlePacket(this.player.getId(), index);
+            PlayerLookup.tracking(player).forEach(p -> {
+                if (p != player) {
+                    ServerPlayNetworking.send(p, packet);
+                }
+            });
+            ServerPlayNetworking.send(player, packet);
+        }
+        this.particles.backend.remove(index);
+    }
+
+    public void addParticle(Vec3d pos) {
+        if (player instanceof ServerPlayerEntity player) {
+            var packet = new AddParticlePacket(this.player.getId(), pos);
+            PlayerLookup.tracking(player).forEach(p -> {
+                if (p != player) {
+                    ServerPlayNetworking.send(p, packet);
+                }
+            });
+            ServerPlayNetworking.send(player, packet);
+        }
+        this.particles.insert(pos, new Droplet());
     }
 
     public void teleport(Vec3d pos) {
