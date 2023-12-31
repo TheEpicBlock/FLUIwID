@@ -29,6 +29,7 @@ public class FishyBusiness {
     public Vec3d camera = Vec3d.ZERO;
     public Vec3d prevCamera = Vec3d.ZERO;
     public Vec3d center = Vec3d.ZERO;
+    public Vec3d waypoint = null;
     private final RollingAverage cameraY = new RollingAverage(25);
     public int movingTicks = 0;
 
@@ -98,7 +99,7 @@ public class FishyBusiness {
 
         this.center = attractionPos;
         boolean crammingThroughGap = false;
-        if (anyCollide(player.getWorld(), player, new Box(attractionPos.subtract(0.1, 0, 0.1), attractionPos.add(0.1, 0.1, 0.1)))) {
+        if (anyCollide(player.getWorld(), player, new Box(attractionPos.subtract(0.1, -0.01, 0.1), attractionPos.add(0.1, 0.1, 0.1)))) {
             if (Streams.of(particles).anyMatch(p -> movementVec.dotProduct(p.position.subtract(canonPosition.add(movementVec.multiply(0.15)))) > 0)) {
                 // This code should only activate if the player is going through a gap
                 crammingThroughGap = true;
@@ -120,6 +121,10 @@ public class FishyBusiness {
                 }
                 if (a) {
                     attractionPos = attractionPos.withAxis(Direction.Axis.Y, y);
+                    if (!anyCollide(player.getWorld(), player, new Box(attractionPos.subtract(0.1, 0, 0.1), attractionPos.add(0.1, 0.1, 0.1))) &&
+                            (waypoint == null || attractionPos.y > waypoint.y || attractionPos.subtract(waypoint).horizontalLengthSquared() > 1)) {
+                        waypoint = attractionPos;
+                    }
                 }
             }
         }
@@ -139,7 +144,15 @@ public class FishyBusiness {
             }
 
             // Attraction force
-            var delta = droplet.position.subtract(attractionPos.add(0,0.01f,0));
+            var dropletAttractionPos = attractionPos;
+            if (waypoint != null && attractionPos.subtract(droplet.position).dotProduct(waypoint.subtract(droplet.position)) > 0 &&
+                    droplet.position.squaredDistanceTo(attractionPos) > waypoint.squaredDistanceTo(attractionPos) &&
+                    droplet.position.squaredDistanceTo(waypoint) > 0.1*0.1 && droplet.position.squaredDistanceTo(attractionPos) > 1 &&
+                    Math.random() > 0.4) {
+                // The waypoint is between the droplet and the attractionpos
+                dropletAttractionPos = waypoint;
+            }
+            var delta = droplet.position.subtract(dropletAttractionPos.add(0,0.01f,0));
             var length = delta.length();
             var direction = delta.normalize();
             var force = Math.max(0.05, smoothKernel(7f, length)) * -(4f*DELTA_T);

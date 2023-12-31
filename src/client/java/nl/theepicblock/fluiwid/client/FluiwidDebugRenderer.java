@@ -27,5 +27,8 @@ public class FluiwidDebugRenderer implements DebugRenderer.Renderer {
         }
         DebugRenderer.drawBox(matrices, vertexConsumers, new Box(data.center, data.center.add(0, 0.5, 0)).expand(0.01).offset(-cameraX, -cameraY, -cameraZ), 0, 1, 1, 1);
         DebugRenderer.drawBox(matrices, vertexConsumers, new Box(data.camera, data.camera).expand(0.05).offset(-cameraX, -cameraY, -cameraZ), 1, 0, 0, 1);
+        if (data.waypoint != null) {
+            DebugRenderer.drawBox(matrices, vertexConsumers, new Box(data.waypoint, data.waypoint).expand(0.05).offset(-cameraX, -cameraY, -cameraZ), 0, 1, 0, 1);
+        }
     }
 }
