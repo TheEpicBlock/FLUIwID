@@ -27,7 +27,7 @@ public abstract class AdjustCamera {
         if (focusedEntity instanceof PlayerDuck quack) {
             var data = quack.fluiwid$getData();
             if (data != null && data.camera != null) {
-                this.setPos(data.camera);
+                this.setPos(data.getCameraPos(tickDelta));
             }
         }
     }

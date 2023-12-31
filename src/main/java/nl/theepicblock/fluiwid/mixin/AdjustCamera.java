@@ -16,11 +16,7 @@ public class AdjustCamera {
         if (this instanceof PlayerDuck quack) {
             var data = quack.fluiwid$getData();
             if (data != null && data.camera != null) {
-                cir.setReturnValue(new Vec3d(
-                        MathHelper.lerp(tickDelta, data.prevCamera.x, data.prevCamera.x),
-                        MathHelper.lerp(tickDelta, data.prevCamera.y, data.prevCamera.y),
-                        MathHelper.lerp(tickDelta, data.prevCamera.z, data.prevCamera.z)
-                ));
+                cir.setReturnValue(data.getCameraPos(tickDelta));
             }
         }
     }

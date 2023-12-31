@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
@@ -191,6 +192,14 @@ public class FishyBusiness {
         this.camera = pos;
         this.cameraY.setAll(pos.y);
         this.movingTicks = 0;
+    }
+
+    public Vec3d getCameraPos(float tickDelta) {
+        return new Vec3d(
+                MathHelper.lerp(tickDelta, this.prevCamera.x, this.prevCamera.x),
+                MathHelper.lerp(tickDelta, this.prevCamera.y, this.prevCamera.y),
+                MathHelper.lerp(tickDelta, this.prevCamera.z, this.prevCamera.z)
+        );
     }
 
     /**
