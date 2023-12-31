@@ -2,16 +2,16 @@
 	"schemaVersion": 1,
 	"id": "fluiwid",
 	"version": "${version}",
-	"name": "Example mod",
+	"name": "FLUIwID",
 	"description": "Become the dihydrogen monoxide",
 	"authors": [
-		"Me!"
+		"TheEpicBlock"
 	],
 	"contact": {
 		"homepage": "https://github.com/TheEpicBlock/FLUIwID/blob/master/README.md",
 		"sources": "https://github.com/TheEpicBlock/FLUIwID"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/fluiwid/icon.png",
 	"environment": "*",
 	"entrypoints": {
