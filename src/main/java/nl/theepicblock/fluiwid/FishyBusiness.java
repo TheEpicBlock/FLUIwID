@@ -1,6 +1,7 @@
 package nl.theepicblock.fluiwid;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -97,7 +98,7 @@ public class FishyBusiness {
             canonPosition = canonPosition.multiply(sooth2).add(a.multiply(1-sooth2));
         }
 
-        var attractionPos = canonPosition.add(movementVec.multiply(0.3));
+        var attractionPos = canonPosition.add(movementVec.multiply(player.getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED) / 0.1F * 0.3F));
 
         this.center = attractionPos;
         boolean crammingThroughGap = false;
