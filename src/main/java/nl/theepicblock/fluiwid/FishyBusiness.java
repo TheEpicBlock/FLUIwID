@@ -86,10 +86,12 @@ public class FishyBusiness {
             movingTicks = Math.max(0, Math.min(20, movingTicks - 1));
         }
         if (movingTicks > 0) {
-            var soothingFactor = smoothKernel(30, movingTicks);
+            var soothingFactor = smoothKernel(35, movingTicks);
             var delta = center.subtract(canonPosition);
-            var smoothmentPos = canonPosition.add(movementVec.normalize().multiply(movementVec.dotProduct(delta))).withAxis(Direction.Axis.Y, center.y);
-            canonPosition = center.multiply(soothingFactor).add(smoothmentPos.multiply(1-soothingFactor));
+            var smoothmentPos = canonPosition.add(movementVec.normalize().multiply(movementVec.dotProduct(delta)).multiply(0.9).add(delta.multiply(0.1))).withAxis(Direction.Axis.Y, center.y);
+            var a = center.multiply(soothingFactor).add(smoothmentPos.multiply(1-soothingFactor));
+            var sooth2 = smoothKernel(25, movingTicks);
+            canonPosition = canonPosition.multiply(sooth2).add(a.multiply(1-sooth2));
         }
 
         var attractionPos = canonPosition.add(movementVec.multiply(0.3));
