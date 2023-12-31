@@ -80,7 +80,7 @@ public class FishyBusiness {
 
         // Resist moving the canon position if the player isn't holding any input
         this.center = center;
-        if (movementVec.horizontalLengthSquared() > 0.1 || center.subtract(canonPosition).lengthSquared() > 1) {
+        if (movementVec.horizontalLengthSquared() > 0.1 || center.subtract(canonPosition).lengthSquared() > 0.2*0.2) {
             movingTicks++;
         } else {
             movingTicks = Math.max(0, Math.min(20, movingTicks - 1));
@@ -88,7 +88,7 @@ public class FishyBusiness {
         if (movingTicks > 0) {
             var soothingFactor = smoothKernel(30, movingTicks);
             var delta = center.subtract(canonPosition);
-            var smoothmentPos = canonPosition.add(movementVec.normalize().multiply(movementVec.dotProduct(delta)));
+            var smoothmentPos = canonPosition.add(movementVec.normalize().multiply(movementVec.dotProduct(delta))).withAxis(Direction.Axis.Y, center.y);
             canonPosition = center.multiply(soothingFactor).add(smoothmentPos.multiply(1-soothingFactor));
         }
 
