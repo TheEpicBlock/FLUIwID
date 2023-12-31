@@ -140,7 +140,7 @@ public class FishyBusiness {
             var delta = droplet.position.subtract(attractionPos.add(0,0.01f,0));
             var length = delta.length();
             var direction = delta.normalize();
-            var force = smoothKernel(7f, length) * -(4f*DELTA_T);
+            var force = Math.max(0.05, smoothKernel(7f, length)) * -(4f*DELTA_T);
             droplet.velocity = droplet.velocity.add(clampY(direction.multiply(force).multiply(2,1,2)));
 
             // Gravity
