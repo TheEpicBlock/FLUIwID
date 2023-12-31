@@ -98,8 +98,8 @@ public class FishyBusiness {
 
         this.center = attractionPos;
         boolean crammingThroughGap = false;
-        if (false && anyCollide(player.getWorld(), player, new Box(attractionPos.subtract(0.1, 0, 0.1), attractionPos.add(0.1, 0.1, 0.1)))) {
-            if (Streams.of(particles).anyMatch(p -> movementVec.dotProduct(p.position.subtract(canonPosition.add(movementVec.multiply(0.1)))) > 0)) {
+        if (anyCollide(player.getWorld(), player, new Box(attractionPos.subtract(0.1, 0, 0.1), attractionPos.add(0.1, 0.1, 0.1)))) {
+            if (Streams.of(particles).anyMatch(p -> movementVec.dotProduct(p.position.subtract(canonPosition.add(movementVec.multiply(0.15)))) > 0)) {
                 // This code should only activate if the player is going through a gap
                 crammingThroughGap = true;
                 // Boost movement
