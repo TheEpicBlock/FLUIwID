@@ -31,7 +31,7 @@ public abstract class AttachWaterData extends LivingEntity implements PlayerDuck
 
     @Inject(method = "initDataTracker", at = @At("HEAD"))
     private void aa(CallbackInfo ci) {
-        this.dataTracker.set(IS_WATER, false);
+        this.dataTracker.startTracking(IS_WATER, false);
 
     }
 
