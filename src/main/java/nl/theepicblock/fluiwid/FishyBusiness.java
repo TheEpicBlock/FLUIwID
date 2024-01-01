@@ -187,7 +187,11 @@ public class FishyBusiness {
         }
 
         // Sync pos
-        this.player.setPos(canonPosition.x, canonPosition.y, canonPosition.z);
+        if (!(this.player instanceof ServerPlayerEntity) && !this.player.isMainPlayer()) {
+            this.canonPosition = this.player.getPos();
+        } else {
+            this.player.setPos(canonPosition.x, canonPosition.y, canonPosition.z);
+        }
         this.player.setVelocity(0,0,0);
     }
 
