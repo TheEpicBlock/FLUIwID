@@ -18,7 +18,7 @@ public class FluiwidClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		WorldRenderEvents.AFTER_ENTITIES.register(FLUIwID_RENDER_PHASE, (ctx) -> {
+		WorldRenderEvents.BEFORE_ENTITIES.register(FLUIwID_RENDER_PHASE, (ctx) -> {
 			ctx.world().getPlayers().forEach(player -> {
 				var fluiwidData = ((PlayerDuck)player).fluiwid$getData();
 				if (fluiwidData != null) {

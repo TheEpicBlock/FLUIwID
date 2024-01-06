@@ -4,9 +4,7 @@ import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.client.color.world.BiomeColors;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.FluidRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.FluidState;
@@ -74,7 +72,7 @@ public class FluiwidRenderer {
             // Don't render if the camera's inside the water, it has icky artifacts
             return;
         }
-        var buf = vertexConsumerProvider.getBuffer(RenderLayers.getFluidLayer(FLUID));
+        var buf = vertexConsumerProvider.getBuffer(TexturedRenderLayers.getEntityTranslucentCull());
         var fluidR = (nl.theepicblock.fluiwid.client.mixin.FluidRenderer)new FluidRenderer();
 
         var bounds = cluster.bounds;
@@ -126,26 +124,30 @@ public class FluiwidRenderer {
                                 buf.vertex(matrix.peek().getPositionMatrix(), corner1.x, corner1.y, corner1.z)
                                         .color(red, green, blue, 1.0F)
                                         .texture(u, v)
+                                        .overlay(OverlayTexture.DEFAULT_UV)
                                         .light(light)
-                                        .normal(0.0F, 1.0F, 0.0F)
+                                        .normal(matrix.peek().getNormalMatrix(), direction.getOffsetX(), direction.getOffsetY(), direction.getOffsetZ())
                                         .next();
                                 buf.vertex(matrix.peek().getPositionMatrix(), corner2.x, corner2.y, corner2.z)
                                         .color(red, green, blue, 1.0F)
                                         .texture(u, v)
+                                        .overlay(OverlayTexture.DEFAULT_UV)
                                         .light(light)
-                                        .normal(0.0F, 1.0F, 0.0F)
+                                        .normal(matrix.peek().getNormalMatrix(), direction.getOffsetX(), direction.getOffsetY(), direction.getOffsetZ())
                                         .next();
                                 buf.vertex(matrix.peek().getPositionMatrix(), corner3.x, corner3.y, corner3.z)
                                         .color(red, green, blue, 1.0F)
                                         .texture(u, v)
+                                        .overlay(OverlayTexture.DEFAULT_UV)
                                         .light(light)
-                                        .normal(0.0F, 1.0F, 0.0F)
+                                        .normal(matrix.peek().getNormalMatrix(), direction.getOffsetX(), direction.getOffsetY(), direction.getOffsetZ())
                                         .next();
                                 buf.vertex(matrix.peek().getPositionMatrix(), corner4.x, corner4.y, corner4.z)
                                         .color(red, green, blue, 1.0F)
                                         .texture(u, v)
+                                        .overlay(OverlayTexture.DEFAULT_UV)
                                         .light(light)
-                                        .normal(0.0F, 1.0F, 0.0F)
+                                        .normal(matrix.peek().getNormalMatrix(), direction.getOffsetX(), direction.getOffsetY(), direction.getOffsetZ())
                                         .next();
                             }
                         }
