@@ -1,5 +1,6 @@
 package nl.theepicblock.fluiwid.client;
 
+import com.mojang.blaze3d.platform.GlDebugInfo;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
@@ -20,6 +21,7 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 
 public class FluiwidRenderer {
+    private static final boolean NVIDIA = GlDebugInfo.getRenderer().toLowerCase().contains("nvidia");
     private static final FluidState FLUID = Fluids.WATER.getStill(false);
     private static final float VOXEL_SIZE = 1/8f;
     private static final double DROPLET_RADIUS = 0.15d;
@@ -72,6 +74,7 @@ public class FluiwidRenderer {
             // Don't render if the camera's inside the water, it has icky artifacts
             return;
         }
+        var layer = NVIDIA ? TexturedRenderLayers.getEntitySolid() : TexturedRenderLayers.getEntityTranslucentCull();
         var buf = vertexConsumerProvider.getBuffer(TexturedRenderLayers.getEntityTranslucentCull());
         var fluidR = (nl.theepicblock.fluiwid.client.mixin.FluidRenderer)new FluidRenderer();
 
@@ -216,6 +219,14 @@ public class FluiwidRenderer {
         public DropletCluster(Box bounds, ArrayList<Droplet> droplets) {
             this.bounds = bounds;
             this.droplets = droplets;
+        }
+    }
+
+    static {
+        if (NVIDIA) {
+            Fluiwid.LOGGER.warn("Nvidia detected, water will be solid");
+        } else {
+            Fluiwid.LOGGER.debug("No Nvidia detected");
         }
     }
 }
